@@ -26,14 +26,12 @@ const Dashboard = () => {
           {/* ---- Column 2 ---- */}
           <div className="space-y-5">
             <UrgentTasks />
-            {/* Empty spacer to visually align with the reference layout */}
-            <div className="hidden lg:block bg-white/40 rounded-2xl h-40" />
+            <TeamDirectory />
           </div>
 
           {/* ---- Column 3 ---- */}
           <div className="space-y-5">
             <NewComments />
-            <TeamDirectory />
           </div>
         </div>
       </div>

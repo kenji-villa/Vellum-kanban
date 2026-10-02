@@ -12,18 +12,15 @@ const team = [
 const TeamDirectory = () => {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
-      <h3 className="font-semibold text-gray-800 text-sm mb-2">
+      <h3 className="font-semibold text-gray-800 text-sm mb-4">
         Team Directory
       </h3>
 
-      {/* Decorative bar (matches reference's soft placeholder feel) */}
-      <div className="h-1 w-1/3 bg-gray-100 rounded-full mb-5" />
-
-      <div className="flex items-start justify-between gap-2 overflow-x-auto">
+      <div className="flex items-start gap-4 overflow-x-auto pb-2 -mx-1 px-1">
         {team.map((t) => (
           <div
             key={t.name}
-            className="flex flex-col items-center text-center shrink-0 min-w-[60px]"
+            className="flex flex-col items-center text-center shrink-0 w-[68px]"
           >
             <div
               className={`w-12 h-12 rounded-full ${t.color} flex items-center justify-center text-white font-semibold text-sm mb-2 ring-2 ring-white shadow-sm`}

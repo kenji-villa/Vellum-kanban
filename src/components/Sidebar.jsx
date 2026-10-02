@@ -90,7 +90,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen justify-between">
+    <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen h-screen sticky top-0 justify-between shrink-0">
       {/* Top Icons */}
       <div className="flex flex-col items-center gap-4">
         {navItems.map((item) => (
