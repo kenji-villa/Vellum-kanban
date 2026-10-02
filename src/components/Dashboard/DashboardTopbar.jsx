@@ -2,19 +2,13 @@ import React from "react";
 
 const DashboardTopbar = () => {
   return (
-    <div className="flex items-start justify-between mb-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Welcome, Dawit!</h1>
-        <p className="text-gray-500 mt-1">Here is your agenda for today</p>
-      </div>
+    <div className="mb-6">
+      <h1 className="text-3xl font-bold text-gray-900 mb-5">
+        Welcome, Juliana!
+      </h1>
 
-      <div className="relative w-72">
-        <input
-          type="text"
-          placeholder="Search"
-          className="w-full bg-gray-200/70 rounded-xl pl-4 pr-10 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <div className="relative w-full">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -30,6 +24,11 @@ const DashboardTopbar = () => {
             />
           </svg>
         </span>
+        <input
+          type="text"
+          placeholder="Search projects, tasks, or people..."
+          className="w-full bg-white rounded-2xl pl-11 pr-4 py-3 text-sm placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
     </div>
   );

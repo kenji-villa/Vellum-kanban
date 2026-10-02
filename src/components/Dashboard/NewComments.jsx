@@ -1,86 +1,70 @@
 import React from "react";
+import { useBoard } from "../../context/BoardContext";
 
-const comments = [
-  {
-    id: 1,
-    name: "Elon S.",
-    context: "Market research 2024",
-    message: "Find my keynote attached in the...",
-    color: "bg-blue-400",
-  },
-  {
-    id: 2,
-    name: "Dana R.",
-    context: "Market research 2024",
-    message: "I've added some new data. Let's...",
-    color: "bg-orange-400",
-  },
+const avatarColors = [
+  "bg-blue-400",
+  "bg-orange-400",
+  "bg-pink-400",
+  "bg-purple-400",
+  "bg-teal-400",
 ];
-
-const tags = [
-  {
-    name: "#Research",
-    subtitle: "Survey design",
-    bg: "bg-purple-50",
-    color: "text-purple-600",
-  },
-  {
-    name: "#Strategy",
-    subtitle: "SWOT analysis",
-    bg: "bg-green-50",
-    color: "text-green-600",
-  },
-  {
-    name: "#Operations",
-    subtitle: "Structure design",
-    bg: "bg-yellow-50",
-    color: "text-yellow-700",
-  },
-];
+const colorFor = (name = "") => {
+  const sum = name.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  return avatarColors[sum % avatarColors.length];
+};
 
 const NewComments = () => {
+  const { state } = useBoard();
+
+  const recent = state.boards
+    .flatMap((b) =>
+      b.lists.flatMap((l) =>
+        l.cards.map((c) => ({
+          ...c,
+          boardTitle: b.title,
+          listTitle: l.title,
+        })),
+      ),
+    )
+    .filter((c) => c.assignee || c.description)
+    .slice(0, 3);
+
   return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h3 className="font-semibold text-gray-800 mb-4">New comments</h3>
+    <div className="bg-white rounded-2xl p-5 shadow-sm">
+      <h3 className="font-semibold text-gray-800 text-sm mb-4">
+        Recent Activity
+      </h3>
+
+      {recent.length === 0 ? (
+        <div className="text-xs text-gray-400 py-6 text-center">
+          No recent activity
+        </div>
+      ) : (
         <ul className="space-y-3">
-          {comments.map((c) => (
+          {recent.map((card) => (
             <li
-              key={c.id}
+              key={card.id}
               className="flex items-start gap-3 bg-gray-50 rounded-xl p-3"
             >
               <div
-                className={`w-8 h-8 rounded-full ${c.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}
+                className={`w-8 h-8 rounded-full ${colorFor(
+                  card.assignee || card.title,
+                )} flex items-center justify-center text-white text-xs font-bold shrink-0`}
               >
-                {c.name.charAt(0)}
+                {(card.assignee || card.title).charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-gray-500 truncate">
-                  {c.name} in {c.context}
+                <p className="text-[11px] text-gray-400 truncate">
+                  {card.assignee || "Someone"} in {card.boardTitle}
                 </p>
                 <p className="text-xs text-gray-800 font-medium truncate">
-                  {c.message}
+                  {card.title}
                 </p>
               </div>
-              <span className="text-gray-400 self-center">›</span>
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* Tags */}
-      <div className="grid grid-cols-3 gap-3">
-        {tags.map((t) => (
-          <div
-            key={t.name}
-            className={`${t.bg} rounded-xl p-3 cursor-pointer hover:shadow-sm transition-shadow`}
-          >
-            <p className={`text-xs font-bold ${t.color}`}>{t.name}</p>
-            <p className="text-[11px] text-gray-600 mt-0.5">{t.subtitle}</p>
-            <span className="text-gray-400 text-xs">›</span>
-          </div>
-        ))}
-      </div>
+      )}
     </div>
   );
 };
