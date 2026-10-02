@@ -13,9 +13,11 @@ const labelColors = {
   Bug: "bg-red-100 text-red-700",
   System: "bg-gray-200 text-gray-700",
   Shipped: "bg-green-100 text-green-700",
+  Research: "bg-orange-100 text-orange-700",
+  Marketing: "bg-yellow-100 text-yellow-700",
 };
 
-const TaskCard = ({ card }) => {
+const TaskCard = ({ card, onClick }) => {
   const priorityClass = priorityDot[card.priority] || "bg-gray-400";
   const formattedDate = card.dueDate
     ? new Date(card.dueDate).toLocaleDateString("en-US", {
@@ -25,8 +27,10 @@ const TaskCard = ({ card }) => {
     : null;
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
-      {/* Priority + Assignee */}
+    <div
+      onClick={onClick}
+      className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
+    >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${priorityClass}`} />
@@ -41,19 +45,16 @@ const TaskCard = ({ card }) => {
         )}
       </div>
 
-      {/* Title */}
       <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1">
         {card.title}
       </h3>
 
-      {/* Description */}
       {card.description && (
         <p className="text-xs text-gray-500 line-clamp-2 mb-3">
           {card.description}
         </p>
       )}
 
-      {/* Labels */}
       {card.labels?.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {card.labels.map((label) => (
@@ -69,14 +70,9 @@ const TaskCard = ({ card }) => {
         </div>
       )}
 
-      {/* Footer: Date + Comments */}
       <div className="flex items-center justify-between text-[11px] text-gray-400">
-        {formattedDate && (
-          <span className="flex items-center gap-1">📅 {formattedDate}</span>
-        )}
-        {card.comments > 0 && (
-          <span className="flex items-center gap-1">💬 {card.comments}</span>
-        )}
+        {formattedDate && <span>📅 {formattedDate}</span>}
+        {card.comments > 0 && <span>💬 {card.comments}</span>}
       </div>
     </div>
   );

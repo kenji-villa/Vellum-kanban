@@ -1,11 +1,18 @@
 import React from "react";
+import { useParams, Navigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import Board from "../components/Board/Board";
-import { initialData } from "../data/initialData";
+import { useBoard } from "../context/BoardContext";
 
 const BoardPage = () => {
-  const activeBoard = initialData.boards[0];
+  const { boardId } = useParams();
+  const { state } = useBoard();
+  const activeBoard = state.boards.find((b) => b.id === boardId);
+
+  if (!activeBoard) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
