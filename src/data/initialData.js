@@ -1,0 +1,98 @@
+export const initialData = {
+  boards: [
+    {
+      id: "board-1",
+      title: "Q4 Roadmap",
+      lists: [
+        {
+          id: "list-1",
+          title: "To Do",
+          cards: [
+            {
+              id: "card-1",
+              title: "Design homepage wireframe",
+              description: "Create the landing page design and responsive UI.",
+              priority: "high",
+              dueDate: "2026-10-10",
+              labels: ["Design", "UI"],
+              assignee: "Sarah Chen",
+              comments: 3,
+            },
+            {
+              id: "card-2",
+              title: "Update footer links",
+              description: "Fix broken links in the footer.",
+              priority: "medium",
+              dueDate: "2026-10-15",
+              labels: ["Development"],
+              assignee: "Ben Carter",
+              comments: 0,
+            },
+            {
+              id: "card-3",
+              title: "Setup design system tokens",
+              description: "Define colors, spacing, and typography tokens.",
+              priority: "low",
+              dueDate: "2026-10-20",
+              labels: ["System"],
+              assignee: "Sarah Chen",
+              comments: 1,
+            },
+          ],
+        },
+        {
+          id: "list-2",
+          title: "In Progress",
+          cards: [
+            {
+              id: "card-4",
+              title: "Refactor auth module",
+              description: "Clean up authentication logic and add unit tests.",
+              priority: "high",
+              dueDate: "2026-10-08",
+              labels: ["Development", "Bug"],
+              assignee: "Marcus Lee",
+              comments: 5,
+            },
+            {
+              id: "card-5",
+              title: "Build onboarding flow",
+              description: "Progress bar 40% complete.",
+              priority: "medium",
+              dueDate: "2026-10-18",
+              labels: ["Design"],
+              assignee: "Priya Nair",
+              comments: 2,
+            },
+          ],
+        },
+        {
+          id: "list-3",
+          title: "Done",
+          cards: [
+            {
+              id: "card-6",
+              title: "Launch v2.1 release",
+              description: "Released on Oct 26, 2023.",
+              priority: "high",
+              dueDate: "2023-10-26",
+              labels: ["Shipped"],
+              assignee: "Sarah Chen",
+              comments: 8,
+            },
+            {
+              id: "card-7",
+              title: "Close Q3 tickets",
+              description: "56 tickets resolved.",
+              priority: "medium",
+              dueDate: "2023-09-30",
+              labels: ["Shipped"],
+              assignee: "Ben Carter",
+              comments: 0,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};

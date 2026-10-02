@@ -1,10 +1,19 @@
 import React from "react";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import Board from "../components/Board/Board";
+import { initialData } from "../data/initialData";
 
 const BoardPage = () => {
+  const activeBoard = initialData.boards[0];
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-gray-800">Kanban Board</h1>
-      <p className="mt-2 text-gray-600">Columns and cards will go here.</p>
+    <div className="flex min-h-screen bg-gray-100">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <Board board={activeBoard} />
+      </div>
     </div>
   );
 };
