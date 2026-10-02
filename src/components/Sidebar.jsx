@@ -1,10 +1,27 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+
+const iconClass = "w-5 h-5";
 
 const navItems = [
   {
-    name: "Dashboard",
+    name: "Home",
     path: "/dashboard",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className={iconClass}
+      >
+        <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
+        <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198c.03-.028.061-.056.091-.086L12 5.432z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Calendar",
+    path: "/calendar",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -12,18 +29,18 @@ const navItems = [
         viewBox="0 0 24 24"
         strokeWidth={1.8}
         stroke="currentColor"
-        className="w-5 h-5"
+        className={iconClass}
       >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
         />
       </svg>
     ),
   },
   {
-    name: "Board",
+    name: "Projects",
     path: "/board/board-1",
     icon: (
       <svg
@@ -32,19 +49,19 @@ const navItems = [
         viewBox="0 0 24 24"
         strokeWidth={1.8}
         stroke="currentColor"
-        className="w-5 h-5"
+        className={iconClass}
       >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"
+          d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
         />
       </svg>
     ),
   },
   {
-    name: "Settings",
-    path: "/settings",
+    name: "Analytics",
+    path: "/analytics",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -52,17 +69,17 @@ const navItems = [
         viewBox="0 0 24 24"
         strokeWidth={1.8}
         stroke="currentColor"
-        className="w-5 h-5"
+        className={iconClass}
       >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
+          d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
         />
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
         />
       </svg>
     ),
@@ -70,29 +87,105 @@ const navItems = [
 ];
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   return (
-    <aside className="w-16 bg-[#1e2757] flex flex-col items-center py-4 gap-2 min-h-screen">
-      {/* Logo */}
-      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center mb-4">
-        <span className="text-white font-bold text-lg">V</span>
+    <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen justify-between">
+      {/* Top Icons */}
+      <div className="flex flex-col items-center gap-4">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            title={item.name}
+            className={({ isActive }) =>
+              `w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
+                isActive
+                  ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
+              }`
+            }
+          >
+            {item.icon}
+          </NavLink>
+        ))}
+
+        {/* Add button */}
+        <button
+          onClick={() => navigate("/board/board-1")}
+          title="New"
+          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.8}
+            stroke="currentColor"
+            className={iconClass}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        </button>
       </div>
 
-      {navItems.map((item) => (
+      {/* Bottom Icons */}
+      <div className="flex flex-col items-center gap-4">
         <NavLink
-          key={item.name}
-          to={item.path}
-          title={item.name}
+          to="/settings"
+          title="Settings"
           className={({ isActive }) =>
-            `w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${
+            `w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
               isActive
                 ? "bg-white/20 text-white"
                 : "text-white/60 hover:bg-white/10 hover:text-white"
             }`
           }
         >
-          {item.icon}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.8}
+            stroke="currentColor"
+            className={iconClass}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
         </NavLink>
-      ))}
+        <button
+          title="Logout"
+          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.8}
+            stroke="currentColor"
+            className={iconClass}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+            />
+          </svg>
+        </button>
+      </div>
     </aside>
   );
 };
