@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useToast } from "../../context/ToastContext";
 import {
   DndContext,
   DragOverlay,
@@ -28,6 +29,7 @@ const Board = ({ board }) => {
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
   const [activeItem, setActiveItem] = useState(null);
+  const toast = useToast();
 
   // ---- Search & Filter state (view-only, not persisted) ----
   const [query, setQuery] = useState("");
@@ -151,6 +153,7 @@ const Board = ({ board }) => {
         type: "ADD_LIST",
         payload: { boardId: board.id, title: newListTitle.trim() },
       });
+      toast.success("List added");
     }
     setNewListTitle("");
     setAddingList(false);
