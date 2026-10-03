@@ -3,7 +3,10 @@ import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
+  useSortable,
+  horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import TaskCard from "../Card/TaskCard";
 import TaskModal from "../Card/TaskModal";
 import { useBoard } from "../../context/BoardContext";
@@ -16,10 +19,30 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
   const [renaming, setRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(list.title);
 
-  const { setNodeRef, isOver } = useDroppable({
+  // --- Column Sortable (for reordering columns) ---
+  const {
+    attributes: colAttributes,
+    listeners: colListeners,
+    setNodeRef: setColumnRef,
+    transform: colTransform,
+    transition: colTransition,
+    isDragging: isColumnDragging,
+  } = useSortable({
     id: list.id,
+    data: { type: "column", listId: list.id },
+  });
+
+  // --- Column Droppable (for dropping cards) ---
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `droppable-${list.id}`,
     data: { type: "list", listId: list.id },
   });
+
+  const columnStyle = {
+    transform: CSS.Transform.toString(colTransform),
+    transition: colTransition,
+    opacity: isColumnDragging ? 0.5 : 1,
+  };
 
   const actionIcon = {
     todo: "+",
@@ -27,16 +50,15 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     done: "✓",
   }[variant];
 
+  // --- Card Handlers ---
   const handleOpenCreate = () => {
     setEditingCard(null);
     setModalOpen(true);
   };
-
   const handleOpenEdit = (card) => {
     setEditingCard(card);
     setModalOpen(true);
   };
-
   const handleSubmitCard = (formData) => {
     if (editingCard) {
       dispatch({
@@ -57,7 +79,6 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     setModalOpen(false);
     setEditingCard(null);
   };
-
   const handleDeleteCard = () => {
     if (!editingCard) return;
     dispatch({
@@ -68,6 +89,7 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     setEditingCard(null);
   };
 
+  // --- List Handlers ---
   const handleRenameList = () => {
     if (newTitle.trim() && newTitle !== list.title) {
       dispatch({
@@ -77,7 +99,6 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     }
     setRenaming(false);
   };
-
   const handleDeleteList = () => {
     if (window.confirm(`Delete list "${list.title}" and all its cards?`)) {
       dispatch({
@@ -92,9 +113,17 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
 
   return (
     <>
-      <div className="flex-1 min-w-[280px] flex flex-col">
-        {/* Column Header */}
-        <div className="bg-[#1e2757] text-white rounded-t-xl px-4 py-3 flex items-center justify-between relative">
+      <div
+        ref={setColumnRef}
+        style={columnStyle}
+        className="flex-1 min-w-[280px] max-w-[320px] flex flex-col"
+      >
+        {/* Column Header — Drag Handle */}
+        <div
+          {...colAttributes}
+          {...colListeners}
+          className="bg-[#1e2757] text-white rounded-t-xl px-4 py-3 flex items-center justify-between relative cursor-grab active:cursor-grabbing"
+        >
           {renaming ? (
             <input
               type="text"
@@ -103,6 +132,7 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
               onBlur={handleRenameList}
               onKeyDown={(e) => e.key === "Enter" && handleRenameList()}
               autoFocus
+              onPointerDown={(e) => e.stopPropagation()} // don't start drag while typing
               className="bg-transparent text-white font-semibold text-sm outline-none border-b border-white/40 w-full"
             />
           ) : (
@@ -112,6 +142,7 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
           )}
 
           <button
+            onPointerDown={(e) => e.stopPropagation()} // don't start drag from the button
             onClick={
               variant === "todo"
                 ? handleOpenCreate
@@ -143,9 +174,9 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
           )}
         </div>
 
-        {/* Droppable Cards Area */}
+        {/* Cards Droppable Area */}
         <div
-          ref={setNodeRef}
+          ref={setDroppableRef}
           className={`rounded-b-xl p-3 flex flex-col gap-3 flex-1 min-h-[500px] transition-colors ${
             isOver ? "bg-blue-100/60" : "bg-gray-200/50"
           }`}

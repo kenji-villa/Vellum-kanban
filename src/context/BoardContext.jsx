@@ -237,6 +237,21 @@ const boardReducer = (state, action) => {
         }),
       };
     }
+
+    // -------- REORDER LIST --------
+    case "REORDER_LIST": {
+      const { boardId, fromIndex, toIndex } = action.payload;
+      return {
+        ...state,
+        boards: state.boards.map((b) => {
+          if (b.id !== boardId) return b;
+          const newLists = [...b.lists];
+          const [moved] = newLists.splice(fromIndex, 1);
+          newLists.splice(toIndex, 0, moved);
+          return { ...b, lists: newLists };
+        }),
+      };
+    }
   }
 };
 

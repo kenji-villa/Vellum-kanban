@@ -7,6 +7,10 @@ import {
   useSensors,
   closestCorners,
 } from "@dnd-kit/core";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import BoardColumn from "./BoardColumn";
 import TaskCard from "../Card/TaskCard";
 import { useBoard } from "../../context/BoardContext";
@@ -21,7 +25,7 @@ const Board = ({ board }) => {
   const { dispatch } = useBoard();
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
-  const [activeCard, setActiveCard] = useState(null);
+  const [activeItem, setActiveItem] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -29,64 +33,101 @@ const Board = ({ board }) => {
     }),
   );
 
-  // ---- Helpers ----
   const findListByCardId = (cardId) =>
     board.lists.find((l) => l.cards.some((c) => c.id === cardId));
 
   const handleDragStart = (event) => {
     const { active } = event;
+    const type = active.data.current?.type;
+
+    if (type === "column") {
+      const list = board.lists.find((l) => l.id === active.id);
+      setActiveItem({ type: "column", data: list });
+      return;
+    }
+
+    // card
     const card = board.lists
       .flatMap((l) => l.cards)
       .find((c) => c.id === active.id);
-    setActiveCard(card || null);
+    setActiveItem({ type: "card", data: card });
   };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    setActiveCard(null);
+    const currentActive = activeItem;
+    setActiveItem(null);
 
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    // ---------- COLUMN REORDER ----------
+    if (currentActive?.type === "column") {
+      const overType = over.data.current?.type;
 
-    const sourceList = findListByCardId(activeId);
-    if (!sourceList) return;
+      // Find the column we dropped onto
+      let overListId = null;
+      if (overType === "column") overListId = over.id;
+      else if (overType === "list") overListId = over.data.current.listId;
+      else if (overType === "card") {
+        const cardList = findListByCardId(over.id);
+        if (cardList) overListId = cardList.id;
+      }
 
-    // Determine destination list
-    let destList;
-    let destIndex;
+      if (!overListId || overListId === active.id) return;
 
-    // If we dropped on a card
-    if (over.data.current?.type === "card") {
-      destList = findListByCardId(overId);
-      if (!destList) return;
-      destIndex = destList.cards.findIndex((c) => c.id === overId);
-    }
-    // If we dropped on a list area
-    else if (over.data.current?.type === "list") {
-      destList = board.lists.find((l) => l.id === overId);
-      if (!destList) return;
-      destIndex = destList.cards.length; // append
-    } else {
+      const fromIndex = board.lists.findIndex((l) => l.id === active.id);
+      const toIndex = board.lists.findIndex((l) => l.id === overListId);
+      if (fromIndex === -1 || toIndex === -1) return;
+
+      dispatch({
+        type: "REORDER_LIST",
+        payload: { boardId: board.id, fromIndex, toIndex },
+      });
       return;
     }
 
-    const sourceIndex = sourceList.cards.findIndex((c) => c.id === activeId);
+    // ---------- CARD MOVE / REORDER ----------
+    if (currentActive?.type === "card") {
+      const activeId = active.id;
+      const overId = over.id;
 
-    // Nothing to do
-    if (sourceList.id === destList.id && sourceIndex === destIndex) return;
+      const sourceList = findListByCardId(activeId);
+      if (!sourceList) return;
 
-    dispatch({
-      type: "MOVE_CARD",
-      payload: {
-        boardId: board.id,
-        fromListId: sourceList.id,
-        toListId: destList.id,
-        fromIndex: sourceIndex,
-        toIndex: destIndex,
-      },
-    });
+      let destList;
+      let destIndex;
+
+      if (over.data.current?.type === "card") {
+        destList = findListByCardId(overId);
+        if (!destList) return;
+        destIndex = destList.cards.findIndex((c) => c.id === overId);
+      } else if (over.data.current?.type === "list") {
+        destList = board.lists.find((l) => l.id === over.data.current.listId);
+        if (!destList) return;
+        destIndex = destList.cards.length;
+      } else if (over.data.current?.type === "column") {
+        // Dropped on a column header — append to end of that column
+        destList = board.lists.find((l) => l.id === over.id);
+        if (!destList) return;
+        destIndex = destList.cards.length;
+      } else {
+        return;
+      }
+
+      const sourceIndex = sourceList.cards.findIndex((c) => c.id === activeId);
+      if (sourceList.id === destList.id && sourceIndex === destIndex) return;
+
+      dispatch({
+        type: "MOVE_CARD",
+        payload: {
+          boardId: board.id,
+          fromListId: sourceList.id,
+          toListId: destList.id,
+          fromIndex: sourceIndex,
+          toIndex: destIndex,
+        },
+      });
+    }
   };
 
   const handleAddList = () => {
@@ -100,6 +141,8 @@ const Board = ({ board }) => {
     setAddingList(false);
   };
 
+  const listIds = board.lists.map((l) => l.id);
+
   return (
     <div className="flex-1 flex flex-col px-8 py-6 overflow-hidden">
       <h1 className="text-center text-2xl font-serif text-gray-800 tracking-widest uppercase mb-6">
@@ -112,18 +155,23 @@ const Board = ({ board }) => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 flex-1 overflow-x-auto pb-4">
-          {board.lists.map((list, idx) => (
-            <BoardColumn
-              key={list.id}
-              boardId={board.id}
-              list={list}
-              variant={variantForIndex(idx)}
-            />
-          ))}
+        <div className="flex gap-4 flex-1 overflow-x-auto pb-4 items-start">
+          <SortableContext
+            items={listIds}
+            strategy={horizontalListSortingStrategy}
+          >
+            {board.lists.map((list, idx) => (
+              <BoardColumn
+                key={list.id}
+                boardId={board.id}
+                list={list}
+                variant={variantForIndex(idx)}
+              />
+            ))}
+          </SortableContext>
 
           {/* Add List */}
-          <div className="min-w-[280px] flex flex-col">
+          <div className="min-w-[280px] max-w-[320px] flex flex-col">
             {addingList ? (
               <div className="bg-white rounded-xl p-3 shadow-sm">
                 <input
@@ -156,7 +204,7 @@ const Board = ({ board }) => {
             ) : (
               <button
                 onClick={() => setAddingList(true)}
-                className="bg-white/60 hover:bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                className="bg-white/60 hover:bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors w-full"
               >
                 + Add List
               </button>
@@ -164,11 +212,35 @@ const Board = ({ board }) => {
           </div>
         </div>
 
-        {/* Drag Overlay: what the user sees while dragging */}
+        {/* DragOverlay — shows a preview of whatever is being dragged */}
         <DragOverlay>
-          {activeCard ? (
+          {activeItem?.type === "card" && activeItem.data ? (
             <div className="rotate-3 cursor-grabbing">
-              <TaskCard card={activeCard} onClick={() => {}} />
+              <TaskCard card={activeItem.data} onClick={() => {}} />
+            </div>
+          ) : activeItem?.type === "column" && activeItem.data ? (
+            <div className="rotate-2 cursor-grabbing w-[280px]">
+              {/* Lightweight column preview */}
+              <div className="bg-[#1e2757] text-white rounded-t-xl px-4 py-3 shadow-2xl">
+                <h2 className="font-semibold text-sm tracking-wide">
+                  {activeItem.data.title}
+                </h2>
+              </div>
+              <div className="bg-gray-200/70 rounded-b-xl p-3 flex flex-col gap-2 min-h-[100px] shadow-xl">
+                {activeItem.data.cards.slice(0, 2).map((c) => (
+                  <div
+                    key={c.id}
+                    className="bg-white rounded-lg p-2 text-xs font-medium text-gray-700 shadow-sm"
+                  >
+                    {c.title}
+                  </div>
+                ))}
+                {activeItem.data.cards.length > 2 && (
+                  <div className="text-[11px] text-gray-500 text-center">
+                    +{activeItem.data.cards.length - 2} more
+                  </div>
+                )}
+              </div>
             </div>
           ) : null}
         </DragOverlay>
