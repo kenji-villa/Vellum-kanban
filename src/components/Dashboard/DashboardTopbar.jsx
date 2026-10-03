@@ -3,9 +3,7 @@ import React from "react";
 const DashboardTopbar = () => {
   return (
     <div className="mb-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-5">
-        Welcome, Juliana!
-      </h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-5">Welcome, Dawit!</h1>
 
       <div className="relative w-full">
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">

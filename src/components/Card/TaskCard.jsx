@@ -1,4 +1,6 @@
 import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const priorityDot = {
   high: "bg-red-500",
@@ -18,6 +20,21 @@ const labelColors = {
 };
 
 const TaskCard = ({ card, onClick }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card.id, data: { type: "card", card } });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
   const priorityClass = priorityDot[card.priority] || "bg-gray-400";
   const formattedDate = card.dueDate
     ? new Date(card.dueDate).toLocaleDateString("en-US", {
@@ -28,8 +45,12 @@ const TaskCard = ({ card, onClick }) => {
 
   return (
     <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
       onClick={onClick}
-      className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
+      className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border border-gray-100 touch-none"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">

@@ -166,16 +166,77 @@ const boardReducer = (state, action) => {
       };
     }
 
-    // -------- REORDER (used in Phase 4) --------
-    case "REORDER_CARDS":
-    case "MOVE_CARD":
-      return state; // placeholder for Phase 4
+    // -------- DRAG & DROP --------
+    // Reorder cards within the SAME list
+    case "REORDER_CARD": {
+      const { boardId, listId, fromIndex, toIndex } = action.payload;
+      return {
+        ...state,
+        boards: state.boards.map((b) =>
+          b.id === boardId
+            ? {
+                ...b,
+                lists: b.lists.map((l) => {
+                  if (l.id !== listId) return l;
+                  const newCards = [...l.cards];
+                  const [moved] = newCards.splice(fromIndex, 1);
+                  newCards.splice(toIndex, 0, moved);
+                  return { ...l, cards: newCards };
+                }),
+              }
+            : b,
+        ),
+      };
+    }
 
-    case "RESET_STATE":
-      return initialData;
+    // Move a card BETWEEN lists (or reorder within the same list via index)
+    case "MOVE_CARD": {
+      const { boardId, fromListId, toListId, fromIndex, toIndex } =
+        action.payload;
+      return {
+        ...state,
+        boards: state.boards.map((b) => {
+          if (b.id !== boardId) return b;
 
-    default:
-      return state;
+          // Find the card being moved
+          const fromList = b.lists.find((l) => l.id === fromListId);
+          if (!fromList) return b;
+          const movedCard = fromList.cards[fromIndex];
+          if (!movedCard) return b;
+
+          // Build new lists
+          const newLists = b.lists.map((l) => {
+            if (l.id === fromListId && l.id === toListId) {
+              // Same list: reorder
+              const newCards = [...l.cards];
+              newCards.splice(fromIndex, 1);
+              newCards.splice(toIndex, 0, movedCard);
+              return { ...l, cards: newCards };
+            }
+            if (l.id === fromListId) {
+              // Remove from source
+              return {
+                ...l,
+                cards: l.cards.filter((_, i) => i !== fromIndex),
+              };
+            }
+            if (l.id === toListId) {
+              // Insert into destination
+              const newCards = [...l.cards];
+              const safeIndex =
+                toIndex === undefined || toIndex > newCards.length
+                  ? newCards.length
+                  : toIndex;
+              newCards.splice(safeIndex, 0, movedCard);
+              return { ...l, cards: newCards };
+            }
+            return l;
+          });
+
+          return { ...b, lists: newLists };
+        }),
+      };
+    }
   }
 };
 

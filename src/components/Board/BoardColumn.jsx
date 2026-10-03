@@ -1,4 +1,9 @@
 import React, { useState } from "react";
+import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import TaskCard from "../Card/TaskCard";
 import TaskModal from "../Card/TaskModal";
 import { useBoard } from "../../context/BoardContext";
@@ -11,13 +16,17 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
   const [renaming, setRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(list.title);
 
+  const { setNodeRef, isOver } = useDroppable({
+    id: list.id,
+    data: { type: "list", listId: list.id },
+  });
+
   const actionIcon = {
     todo: "+",
     inprogress: "…",
     done: "✓",
   }[variant];
 
-  // --- Card Handlers ---
   const handleOpenCreate = () => {
     setEditingCard(null);
     setModalOpen(true);
@@ -59,7 +68,6 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     setEditingCard(null);
   };
 
-  // --- List Handlers ---
   const handleRenameList = () => {
     if (newTitle.trim() && newTitle !== list.title) {
       dispatch({
@@ -79,6 +87,8 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     }
     setListMenuOpen(false);
   };
+
+  const cardIds = list.cards.map((c) => c.id);
 
   return (
     <>
@@ -112,9 +122,8 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
             {variant === "todo" ? "+" : actionIcon}
           </button>
 
-          {/* List Options Dropdown */}
           {listMenuOpen && (
-            <div className="absolute top-full right-2 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-1 w-36 z-10">
+            <div className="absolute top-full right-2 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-1 w-36 z-20">
               <button
                 onClick={() => {
                   setRenaming(true);
@@ -134,25 +143,34 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
           )}
         </div>
 
-        {/* Cards Area */}
-        <div className="bg-gray-200/50 rounded-b-xl p-3 flex flex-col gap-3 flex-1 min-h-[500px]">
-          {list.cards.map((card) => (
-            <TaskCard
-              key={card.id}
-              card={card}
-              onClick={() => handleOpenEdit(card)}
-            />
-          ))}
+        {/* Droppable Cards Area */}
+        <div
+          ref={setNodeRef}
+          className={`rounded-b-xl p-3 flex flex-col gap-3 flex-1 min-h-[500px] transition-colors ${
+            isOver ? "bg-blue-100/60" : "bg-gray-200/50"
+          }`}
+        >
+          <SortableContext
+            items={cardIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {list.cards.map((card) => (
+              <TaskCard
+                key={card.id}
+                card={card}
+                onClick={() => handleOpenEdit(card)}
+              />
+            ))}
+          </SortableContext>
 
           {list.cards.length === 0 && (
             <div className="text-center text-xs text-gray-400 py-6">
-              No cards yet
+              Drop a card here
             </div>
           )}
         </div>
       </div>
 
-      {/* Task Modal */}
       <TaskModal
         isOpen={modalOpen}
         onClose={() => {
