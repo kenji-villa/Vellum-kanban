@@ -97,7 +97,7 @@ const FilterBar = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search tasks..."
-            className="w-full bg-white pl-10 pr-9 py-2 text-sm rounded-lg shadow-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full bg-white dark:bg-slate-800 dark:text-gray-100 pl-10 pr-9 py-2 text-sm rounded-lg shadow-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           {query && (
             <button
@@ -142,7 +142,7 @@ const FilterBar = ({
           </button>
 
           {dropdownOpen && (
-            <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 z-30 p-4 max-h-[70vh] overflow-y-auto">
+            <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 z-30 p-4 max-h-[70vh] overflow-y-auto">
               {/* Priority */}
               <div className="mb-4">
                 <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wide mb-2">
