@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ConfirmDialog from "../UI/ConfirmDialog";
+import { useToast } from "../../context/ToastContext";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -18,6 +20,8 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
   const [listMenuOpen, setListMenuOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(list.title);
+  const toast = useToast();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // --- Column Sortable (for reordering columns) ---
   const {
@@ -70,21 +74,25 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
           updates: formData,
         },
       });
+      toast.success("Task updated");
     } else {
       dispatch({
         type: "ADD_CARD",
         payload: { boardId, listId: list.id, ...formData },
       });
+      toast.success("Task created");
     }
     setModalOpen(false);
     setEditingCard(null);
   };
+
   const handleDeleteCard = () => {
     if (!editingCard) return;
     dispatch({
       type: "DELETE_CARD",
       payload: { boardId, listId: list.id, cardId: editingCard.id },
     });
+    toast.info("Task deleted");
     setModalOpen(false);
     setEditingCard(null);
   };
@@ -96,17 +104,22 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
         type: "UPDATE_LIST",
         payload: { boardId, listId: list.id, title: newTitle.trim() },
       });
+      toast.success("List renamed");
     }
     setRenaming(false);
   };
+
   const handleDeleteList = () => {
-    if (window.confirm(`Delete list "${list.title}" and all its cards?`)) {
-      dispatch({
-        type: "DELETE_LIST",
-        payload: { boardId, listId: list.id },
-      });
-    }
+    setConfirmOpen(true);
     setListMenuOpen(false);
+  };
+
+  const confirmDeleteList = () => {
+    dispatch({
+      type: "DELETE_LIST",
+      payload: { boardId, listId: list.id },
+    });
+    toast.info(`List "${list.title}" deleted`);
   };
 
   const cardIds = list.cards.map((c) => c.id);
@@ -178,7 +191,9 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
         <div
           ref={setDroppableRef}
           className={`rounded-b-xl p-3 flex flex-col gap-3 flex-1 min-h-[500px] transition-colors ${
-            isOver ? "bg-blue-100/60" : "bg-gray-200/50"
+            isOver
+              ? "bg-blue-100/60 dark:bg-blue-900/30"
+              : "bg-gray-200/50 dark:bg-slate-800/50"
           }`}
         >
           <SortableContext
@@ -211,6 +226,14 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
         card={editingCard}
         onSubmit={handleSubmitCard}
         onDelete={handleDeleteCard}
+      />
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmDeleteList}
+        title="Delete list?"
+        message={`Delete "${list.title}" and all its cards? This cannot be undone.`}
+        confirmText="Delete List"
       />
     </>
   );
