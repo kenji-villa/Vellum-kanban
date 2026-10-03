@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -13,7 +13,9 @@ import {
 } from "@dnd-kit/sortable";
 import BoardColumn from "./BoardColumn";
 import TaskCard from "../Card/TaskCard";
+import FilterBar from "./FilterBar";
 import { useBoard } from "../../context/BoardContext";
+import { filterBoard, emptyFilters } from "../../utils/filters";
 
 const variantForIndex = (index) => {
   if (index === 0) return "todo";
@@ -27,12 +29,28 @@ const Board = ({ board }) => {
   const [newListTitle, setNewListTitle] = useState("");
   const [activeItem, setActiveItem] = useState(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
+  // ---- Search & Filter state (view-only, not persisted) ----
+  const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState(emptyFilters);
+
+  // ---- Compute visible board based on filters ----
+  const visibleBoard = useMemo(
+    () => filterBoard(board, query, filters),
+    [board, query, filters],
   );
 
+  // ---- Counts for the counter ----
+  const totalCards = board.lists.reduce((acc, l) => acc + l.cards.length, 0);
+  const visibleCards = visibleBoard.lists.reduce(
+    (acc, l) => acc + l.cards.length,
+    0,
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  // ---- Drag logic (unchanged) ----
   const findListByCardId = (cardId) =>
     board.lists.find((l) => l.cards.some((c) => c.id === cardId));
 
@@ -46,7 +64,6 @@ const Board = ({ board }) => {
       return;
     }
 
-    // card
     const card = board.lists
       .flatMap((l) => l.cards)
       .find((c) => c.id === active.id);
@@ -64,7 +81,6 @@ const Board = ({ board }) => {
     if (currentActive?.type === "column") {
       const overType = over.data.current?.type;
 
-      // Find the column we dropped onto
       let overListId = null;
       if (overType === "column") overListId = over.id;
       else if (overType === "list") overListId = over.data.current.listId;
@@ -106,7 +122,6 @@ const Board = ({ board }) => {
         if (!destList) return;
         destIndex = destList.cards.length;
       } else if (over.data.current?.type === "column") {
-        // Dropped on a column header — append to end of that column
         destList = board.lists.find((l) => l.id === over.id);
         if (!destList) return;
         destIndex = destList.cards.length;
@@ -141,13 +156,43 @@ const Board = ({ board }) => {
     setAddingList(false);
   };
 
-  const listIds = board.lists.map((l) => l.id);
+  const listIds = visibleBoard.lists.map((l) => l.id);
 
   return (
     <div className="flex-1 flex flex-col px-8 py-6 overflow-hidden">
-      <h1 className="text-center text-2xl font-serif text-gray-800 tracking-widest uppercase mb-6">
+      <h1 className="text-center text-2xl font-serif text-gray-800 tracking-widest uppercase mb-4">
         {board.title}
       </h1>
+
+      {/* Search & Filter Bar */}
+      <FilterBar
+        query={query}
+        setQuery={setQuery}
+        filters={filters}
+        setFilters={setFilters}
+        visible={visibleCards}
+        total={totalCards}
+      />
+      {/* Empty Search/Filter Result */}
+      {visibleCards === 0 && totalCards > 0 && (
+        <div className="bg-white rounded-xl p-8 text-center shadow-sm mb-4">
+          <p className="text-gray-700 font-medium">
+            No tasks match your search or filters
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Try adjusting your keywords or clearing filters.
+          </p>
+          <button
+            onClick={() => {
+              setQuery("");
+              setFilters(emptyFilters);
+            }}
+            className="mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Clear everything
+          </button>
+        </div>
+      )}
 
       <DndContext
         sensors={sensors}
@@ -160,7 +205,7 @@ const Board = ({ board }) => {
             items={listIds}
             strategy={horizontalListSortingStrategy}
           >
-            {board.lists.map((list, idx) => (
+            {visibleBoard.lists.map((list, idx) => (
               <BoardColumn
                 key={list.id}
                 boardId={board.id}
@@ -212,7 +257,7 @@ const Board = ({ board }) => {
           </div>
         </div>
 
-        {/* DragOverlay — shows a preview of whatever is being dragged */}
+        {/* DragOverlay */}
         <DragOverlay>
           {activeItem?.type === "card" && activeItem.data ? (
             <div className="rotate-3 cursor-grabbing">
@@ -220,7 +265,6 @@ const Board = ({ board }) => {
             </div>
           ) : activeItem?.type === "column" && activeItem.data ? (
             <div className="rotate-2 cursor-grabbing w-[280px]">
-              {/* Lightweight column preview */}
               <div className="bg-[#1e2757] text-white rounded-t-xl px-4 py-3 shadow-2xl">
                 <h2 className="font-semibold text-sm tracking-wide">
                   {activeItem.data.title}
