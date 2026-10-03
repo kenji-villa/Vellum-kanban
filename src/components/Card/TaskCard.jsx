@@ -50,7 +50,7 @@ const TaskCard = ({ card, onClick }) => {
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border border-gray-100 touch-none"
+      className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border border-gray-100 dark:border-slate-700 touch-none"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
@@ -66,12 +66,12 @@ const TaskCard = ({ card, onClick }) => {
         )}
       </div>
 
-      <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1">
+      <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm leading-tight mb-1">
         {card.title}
       </h3>
 
       {card.description && (
-        <p className="text-xs text-gray-500 line-clamp-2 mb-3">
+        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
           {card.description}
         </p>
       )}
