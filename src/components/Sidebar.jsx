@@ -1,5 +1,5 @@
 import React from "react";
-import { useTheme } from "../hooks/useTheme";
+import { useSettings } from "../context/SettingsContext";
 import { NavLink, useNavigate } from "react-router-dom";
 
 const iconClass = "w-5 h-5";
@@ -89,7 +89,12 @@ const navItems = [
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { settings, updateSetting } = useSettings();
+
+  const toggleTheme = () => {
+    updateSetting("theme", settings.theme === "dark" ? "light" : "dark");
+  };
+
   return (
     <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen h-screen sticky top-0 justify-between shrink-0">
       {/* Top Icons */}
@@ -114,22 +119,22 @@ const Sidebar = () => {
         {/* Add button */}
         <button
           onClick={toggleTheme}
-          title="Toggle theme"
-          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 transition-colors"
+          aria-label="Toggle theme"
         >
-          {theme === "dark" ? (
+          {settings.theme === "dark" ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1.8}
+              strokeWidth={1.5}
               stroke="currentColor"
-              className="w-5 h-5"
+              className="w-5 h-5 text-amber-400"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+                d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25m-13.5 0H3m15.364 6.364l-1.591-1.591M6.758 6.758L5.167 5.167m12.8 12.8l-1.591-1.591M6.758 17.242l-1.591 1.591M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"
               />
             </svg>
           ) : (
@@ -137,9 +142,9 @@ const Sidebar = () => {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1.8}
+              strokeWidth={1.5}
               stroke="currentColor"
-              className="w-5 h-5"
+              className="w-5 h-5 text-slate-700"
             >
               <path
                 strokeLinecap="round"
