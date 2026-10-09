@@ -252,6 +252,12 @@ const boardReducer = (state, action) => {
         }),
       };
     }
+    case "REPLACE_STATE": {
+      return {
+        ...state,
+        boards: action.payload.boards || [],
+      };
+    }
   }
 };
 
