@@ -30,12 +30,11 @@ const LandingNav = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#1e2757] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">V</span>
-            </div>
-            <span className="font-bold text-gray-900 dark:text-gray-100">
-              Vellum
-            </span>
+            <img
+              src="/Logo2.png"
+              alt="Vellum"
+              className="w-20 h-20 object-contain"
+            />
           </Link>
 
           {/* Center Links */}
@@ -54,13 +53,13 @@ const LandingNav = () => {
           {/* Right: CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Link
-              to="/dashboard"
+              to="/login"
               className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
             >
               Sign in
             </Link>
             <Link
-              to="/dashboard"
+              to="/signup"
               className="bg-[#1e2757] hover:bg-[#151c45] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
               Get Started

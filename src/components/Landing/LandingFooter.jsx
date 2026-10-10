@@ -8,12 +8,11 @@ const LandingFooter = () => (
         {/* Brand */}
         <div className="col-span-2 md:col-span-1">
           <Link to="/" className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#1e2757] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">V</span>
-            </div>
-            <span className="font-bold text-gray-900 dark:text-gray-100">
-              Vellum
-            </span>
+            <img
+              src="/Logo2.png"
+              alt="Vellum"
+              className="w-15 h-15 object-contain"
+            />
           </Link>
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
             A local-first Kanban board for focused teams.
@@ -51,8 +50,7 @@ const LandingFooter = () => (
 
       <div className="mt-12 pt-8 border-t border-gray-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          © {new Date().getFullYear()} Vellum. Built with React, Vite, and
-          Tailwind.
+          © {new Date().getFullYear()} Vellum.
         </p>
         <div className="flex gap-4">
           {["Twitter", "GitHub", "Discord"].map((s) => (

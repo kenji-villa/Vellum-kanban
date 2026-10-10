@@ -1,6 +1,7 @@
 import React from "react";
 import { useSettings } from "../context/SettingsContext";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const iconClass = "w-5 h-5";
 
@@ -88,6 +89,7 @@ const navItems = [
 ];
 
 const Sidebar = () => {
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const { settings, updateSetting } = useSettings();
 
@@ -191,7 +193,11 @@ const Sidebar = () => {
         </NavLink>
         <button
           title="Logout"
-          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +205,7 @@ const Sidebar = () => {
             viewBox="0 0 24 24"
             strokeWidth={1.8}
             stroke="currentColor"
-            className={iconClass}
+            className="w-5 h-5"
           >
             <path
               strokeLinecap="round"

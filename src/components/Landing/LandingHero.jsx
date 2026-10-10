@@ -46,7 +46,7 @@ const LandingHero = () => {
         {/* CTAs */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            to="/dashboard"
+            to="/signup"
             className="bg-[#1e2757] hover:bg-[#151c45] text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors shadow-lg shadow-[#1e2757]/20"
           >
             Get Started — Free

@@ -17,7 +17,7 @@ const LandingCTA = () => (
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              to="/dashboard"
+              to="/signup"
               className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-xl transition-colors shadow-lg shadow-orange-500/30"
             >
               Launch Vellum Free

@@ -144,7 +144,7 @@ const LandingPricing = () => (
             </ul>
 
             <Link
-              to={plan.cta === "Get Started" ? "/dashboard" : "#"}
+              to={plan.cta === "Get Started" ? "/signup" : "#"}
               className={`block text-center text-sm font-medium py-3 rounded-xl transition-colors ${
                 plan.highlighted
                   ? "bg-orange-500 hover:bg-orange-600 text-white"

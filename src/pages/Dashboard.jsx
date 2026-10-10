@@ -12,6 +12,8 @@ import Modal from "../components/UI/Modal";
 import BoardCard from "../components/Dashboard/BoardCard";
 import { useBoard } from "../context/BoardContext";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
+import { useSettings } from "../context/SettingsContext";
 
 const Dashboard = () => {
   const { state, dispatch } = useBoard();
@@ -19,6 +21,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [newBoardOpen, setNewBoardOpen] = useState(false);
   const [boardTitle, setBoardTitle] = useState("");
+  const { user } = useAuth();
+  const { settings, updateSetting } = useSettings();
+
+  useEffect(() => {
+    if (user?.name && user.name !== settings.userName) {
+      updateSetting("userName", user.name);
+    }
+  }, [user?.name]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 300);
