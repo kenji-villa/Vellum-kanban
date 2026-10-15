@@ -2,13 +2,16 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import boardRoutes from "./routes/boardRoutes.js";
+import listRoutes from "./routes/listRoutes.js";
+import cardRoutes from "./routes/cardRoutes.js";
+import { requireAuth } from "./middleware/authMiddleware.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -17,20 +20,22 @@ app.use(
 );
 app.use(express.json());
 
-// Health check
 app.get("/", (req, res) => {
   res.json({ status: "ok", service: "vellum-api" });
 });
 
-// Routes
+// Public
 app.use("/api/auth", authRoutes);
 
-// 404
+// Protected
+app.use("/api/boards", requireAuth, boardRoutes);
+app.use("/api/lists", requireAuth, listRoutes);
+app.use("/api/cards", requireAuth, cardRoutes);
+
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ message: "Internal server error" });
