@@ -6,7 +6,7 @@ import ConfirmDialog from "../UI/ConfirmDialog";
 
 const BoardCard = ({ board }) => {
   const navigate = useNavigate();
-  const { dispatch } = useBoard();
+  const { renameBoard, deleteBoard } = useBoard();
   const toast = useToast();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,23 +36,25 @@ const BoardCard = ({ board }) => {
     }
   }, [renaming, board.title]);
 
-  const handleRename = () => {
+  const handleRename = async () => {
     if (title.trim() && title.trim() !== board.title) {
-      dispatch({
-        type: "RENAME_BOARD",
-        payload: { boardId: board.id, title: title.trim() },
-      });
-      toast.success("Board renamed");
+      try {
+        await renameBoard(board.id, title.trim());
+        toast.success("Board renamed");
+      } catch (err) {
+        toast.error("Failed to rename");
+      }
     }
     setRenaming(false);
   };
 
-  const handleDelete = () => {
-    dispatch({
-      type: "DELETE_BOARD",
-      payload: { boardId: board.id },
-    });
-    toast.info(`Board "${board.title}" deleted`);
+  const handleDelete = async () => {
+    try {
+      await deleteBoard(board.id);
+      toast.info(`Board "${board.title}" deleted`);
+    } catch (err) {
+      toast.error("Failed to delete");
+    }
   };
 
   const handleCardClick = () => {
