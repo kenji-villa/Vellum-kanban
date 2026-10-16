@@ -1,101 +1,104 @@
 import React from "react";
-import { useSettings } from "../context/SettingsContext";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useSettings } from "../context/SettingsContext";
+import { useBoard } from "../context/BoardContext";
 import { useAuth } from "../context/AuthContext";
 
 const iconClass = "w-5 h-5";
 
-const navItems = [
-  {
-    name: "Home",
-    path: "/dashboard",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className={iconClass}
-      >
-        <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
-        <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198c.03-.028.061-.056.091-.086L12 5.432z" />
-      </svg>
-    ),
-  },
-  {
-    name: "Calendar",
-    path: "/calendar",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.8}
-        stroke="currentColor"
-        className={iconClass}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-        />
-      </svg>
-    ),
-  },
-  {
-    name: "Projects",
-    path: "/board/board-1",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.8}
-        stroke="currentColor"
-        className={iconClass}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-        />
-      </svg>
-    ),
-  },
-  {
-    name: "Analytics",
-    path: "/analytics",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.8}
-        stroke="currentColor"
-        className={iconClass}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
-        />
-      </svg>
-    ),
-  },
-];
-
 const Sidebar = () => {
-  const { logout } = useAuth();
   const navigate = useNavigate();
   const { settings, updateSetting } = useSettings();
+  const { state } = useBoard();
+  const { logout } = useAuth();
 
-  const toggleTheme = () => {
-    updateSetting("theme", settings.theme === "dark" ? "light" : "dark");
-  };
+  // Resolve which board the "Projects" link should point to
+  const firstBoard = state.boards[0];
+  const projectsPath = firstBoard ? `/board/${firstBoard.id}` : "/dashboard";
+
+  const navItems = [
+    {
+      name: "Home",
+      path: "/dashboard",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className={iconClass}
+        >
+          <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
+          <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198c.03-.028.061-.056.091-.086L12 5.432z" />
+        </svg>
+      ),
+    },
+    {
+      name: "Calendar",
+      path: "/calendar",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.8}
+          stroke="currentColor"
+          className={iconClass}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+          />
+        </svg>
+      ),
+    },
+    {
+      name: "Projects",
+      path: projectsPath,
+      matchPattern: /^\/board\//,
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.8}
+          stroke="currentColor"
+          className={iconClass}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+          />
+        </svg>
+      ),
+    },
+    {
+      name: "Analytics",
+      path: "/analytics",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.8}
+          stroke="currentColor"
+          className={iconClass}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
+          />
+        </svg>
+      ),
+    },
+  ];
 
   return (
     <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen h-screen sticky top-0 justify-between shrink-0">
@@ -106,13 +109,19 @@ const Sidebar = () => {
             key={item.name}
             to={item.path}
             title={item.name}
-            className={({ isActive }) =>
-              `w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
-                isActive
+            end={item.path === "/dashboard"}
+            className={({ isActive }) => {
+              // Custom active check for dynamic paths (Projects)
+              const isProjects =
+                item.matchPattern &&
+                item.matchPattern.test(window.location.pathname);
+              const active = isActive || isProjects;
+              return `w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
+                active
                   ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30"
                   : "text-white/60 hover:bg-white/10 hover:text-white"
-              }`
-            }
+              }`;
+            }}
           >
             {item.icon}
           </NavLink>
@@ -120,23 +129,52 @@ const Sidebar = () => {
 
         {/* Add button */}
         <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 transition-colors"
-          aria-label="Toggle theme"
+          onClick={() => {
+            if (firstBoard) navigate(`/board/${firstBoard.id}`);
+            else navigate("/dashboard");
+          }}
+          title="New"
+          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.8}
+            stroke="currentColor"
+            className={iconClass}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Bottom Icons */}
+      <div className="flex flex-col items-center gap-4">
+        <button
+          onClick={() =>
+            updateSetting("theme", settings.theme === "dark" ? "light" : "dark")
+          }
+          title="Toggle theme"
+          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition-colors"
         >
           {settings.theme === "dark" ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1.5}
+              strokeWidth={1.8}
               stroke="currentColor"
-              className="w-5 h-5 text-amber-400"
+              className={iconClass}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25m-13.5 0H3m15.364 6.364l-1.591-1.591M6.758 6.758L5.167 5.167m12.8 12.8l-1.591-1.591M6.758 17.242l-1.591 1.591M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"
+                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
               />
             </svg>
           ) : (
@@ -144,9 +182,9 @@ const Sidebar = () => {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              strokeWidth={1.5}
+              strokeWidth={1.8}
               stroke="currentColor"
-              className="w-5 h-5 text-slate-700"
+              className={iconClass}
             >
               <path
                 strokeLinecap="round"
@@ -156,10 +194,7 @@ const Sidebar = () => {
             </svg>
           )}
         </button>
-      </div>
 
-      {/* Bottom Icons */}
-      <div className="flex flex-col items-center gap-4">
         <NavLink
           to="/settings"
           title="Settings"
@@ -191,6 +226,7 @@ const Sidebar = () => {
             />
           </svg>
         </NavLink>
+
         <button
           title="Logout"
           onClick={() => {
@@ -205,7 +241,7 @@ const Sidebar = () => {
             viewBox="0 0 24 24"
             strokeWidth={1.8}
             stroke="currentColor"
-            className="w-5 h-5"
+            className={iconClass}
           >
             <path
               strokeLinecap="round"
