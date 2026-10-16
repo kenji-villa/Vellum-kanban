@@ -14,7 +14,8 @@ import TaskModal from "../Card/TaskModal";
 import { useBoard } from "../../context/BoardContext";
 
 const BoardColumn = ({ boardId, list, variant = "todo" }) => {
-  const { dispatch } = useBoard();
+  const { updateCard, deleteCard, createCard, updateList, deleteList } =
+    useBoard();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [listMenuOpen, setListMenuOpen] = useState(false);
@@ -63,48 +64,43 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     setEditingCard(card);
     setModalOpen(true);
   };
-  const handleSubmitCard = (formData) => {
-    if (editingCard) {
-      dispatch({
-        type: "UPDATE_CARD",
-        payload: {
-          boardId,
-          listId: list.id,
-          cardId: editingCard.id,
-          updates: formData,
-        },
-      });
-      toast.success("Task updated");
-    } else {
-      dispatch({
-        type: "ADD_CARD",
-        payload: { boardId, listId: list.id, ...formData },
-      });
-      toast.success("Task created");
+  const handleSubmitCard = async (formData) => {
+    try {
+      if (editingCard) {
+        await updateCard(boardId, list.id, editingCard.id, formData);
+        toast.success("Task updated");
+      } else {
+        await createCard(boardId, list.id, formData);
+        toast.success("Task created");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to save task");
     }
     setModalOpen(false);
     setEditingCard(null);
   };
 
-  const handleDeleteCard = () => {
+  const handleDeleteCard = async () => {
     if (!editingCard) return;
-    dispatch({
-      type: "DELETE_CARD",
-      payload: { boardId, listId: list.id, cardId: editingCard.id },
-    });
-    toast.info("Task deleted");
+    try {
+      await deleteCard(boardId, list.id, editingCard.id);
+      toast.info("Task deleted");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete");
+    }
     setModalOpen(false);
     setEditingCard(null);
   };
 
   // --- List Handlers ---
-  const handleRenameList = () => {
+  const handleRenameList = async () => {
     if (newTitle.trim() && newTitle !== list.title) {
-      dispatch({
-        type: "UPDATE_LIST",
-        payload: { boardId, listId: list.id, title: newTitle.trim() },
-      });
-      toast.success("List renamed");
+      try {
+        await updateList(boardId, list.id, newTitle.trim());
+        toast.success("List renamed");
+      } catch (err) {
+        toast.error(err.message || "Failed to rename");
+      }
     }
     setRenaming(false);
   };
@@ -114,12 +110,13 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     setListMenuOpen(false);
   };
 
-  const confirmDeleteList = () => {
-    dispatch({
-      type: "DELETE_LIST",
-      payload: { boardId, listId: list.id },
-    });
-    toast.info(`List "${list.title}" deleted`);
+  const confirmDeleteList = async () => {
+    try {
+      await deleteList(boardId, list.id);
+      toast.info(`List "${list.title}" deleted`);
+    } catch (err) {
+      toast.error(err.message || "Failed to delete");
+    }
   };
 
   const cardIds = list.cards.map((c) => c.id);

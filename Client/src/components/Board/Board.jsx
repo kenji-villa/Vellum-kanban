@@ -25,7 +25,7 @@ const variantForIndex = (index) => {
 };
 
 const Board = ({ board }) => {
-  const { dispatch } = useBoard();
+  const { createList, reorderLists, moveCard } = useBoard();
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
   const [activeItem, setActiveItem] = useState(null);
@@ -72,7 +72,7 @@ const Board = ({ board }) => {
     setActiveItem({ type: "card", data: card });
   };
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
     const currentActive = activeItem;
     setActiveItem(null);
@@ -97,10 +97,11 @@ const Board = ({ board }) => {
       const toIndex = board.lists.findIndex((l) => l.id === overListId);
       if (fromIndex === -1 || toIndex === -1) return;
 
-      dispatch({
-        type: "REORDER_LIST",
-        payload: { boardId: board.id, fromIndex, toIndex },
-      });
+      try {
+        await reorderLists(board.id, fromIndex, toIndex);
+      } catch (err) {
+        toast.error(err.message || "Failed to reorder lists");
+      }
       return;
     }
 
@@ -134,26 +135,28 @@ const Board = ({ board }) => {
       const sourceIndex = sourceList.cards.findIndex((c) => c.id === activeId);
       if (sourceList.id === destList.id && sourceIndex === destIndex) return;
 
-      dispatch({
-        type: "MOVE_CARD",
-        payload: {
-          boardId: board.id,
-          fromListId: sourceList.id,
-          toListId: destList.id,
-          fromIndex: sourceIndex,
-          toIndex: destIndex,
-        },
-      });
+      try {
+        await moveCard(
+          board.id,
+          sourceList.id,
+          destList.id,
+          sourceIndex,
+          destIndex,
+        );
+      } catch (err) {
+        toast.error(err.message || "Failed to move card");
+      }
     }
   };
 
-  const handleAddList = () => {
+  const handleAddList = async () => {
     if (newListTitle.trim()) {
-      dispatch({
-        type: "ADD_LIST",
-        payload: { boardId: board.id, title: newListTitle.trim() },
-      });
-      toast.success("List added");
+      try {
+        await createList(board.id, newListTitle.trim());
+        toast.success("List added");
+      } catch (err) {
+        toast.error(err.message || "Failed to add list");
+      }
     }
     setNewListTitle("");
     setAddingList(false);
