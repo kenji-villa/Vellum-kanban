@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import DashboardTopbar from "../components/Dashboard/DashboardTopbar";
 import Calendar from "../components/Calendar/Calendar";
@@ -16,13 +15,14 @@ import { useAuth } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 
 const Dashboard = () => {
-  const { state, dispatch } = useBoard();
+  const { state, createBoard } = useBoard();
   const toast = useToast();
-  const [loading, setLoading] = useState(true);
-  const [newBoardOpen, setNewBoardOpen] = useState(false);
-  const [boardTitle, setBoardTitle] = useState("");
   const { user } = useAuth();
   const { settings, updateSetting } = useSettings();
+
+  const [newBoardOpen, setNewBoardOpen] = useState(false);
+  const [boardTitle, setBoardTitle] = useState("");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (user?.name && user.name !== settings.userName) {
@@ -30,47 +30,86 @@ const Dashboard = () => {
     }
   }, [user?.name]);
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(t);
-  }, []);
-
   const handleAddBoard = () => {
     setBoardTitle("");
     setNewBoardOpen(true);
   };
 
-  const createBoard = () => {
-    if (boardTitle.trim()) {
-      dispatch({ type: "ADD_BOARD", payload: { title: boardTitle.trim() } });
+  const handleCreateBoard = async () => {
+    const title = boardTitle.trim();
+    if (!title) {
+      toast.error("Please enter a board name");
+      return;
+    }
+    setCreating(true);
+    try {
+      await createBoard(title);
       toast.success("Board created");
       setNewBoardOpen(false);
       setBoardTitle("");
+    } catch (err) {
+      toast.error(err.message || "Failed to create board");
+    } finally {
+      setCreating(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen bg-[#f4f4f4] dark:bg-[#0f172a]">
-        <Sidebar />
-        <div className="flex-1 flex flex-col p-8">
-          <DashboardTopbar />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-pulse">
-            <div className="space-y-5">
-              <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-52" />
-              <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-64" />
-            </div>
-            <div className="space-y-5">
-              <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-52" />
-              <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-64" />
-            </div>
-            <div className="space-y-5">
-              <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-52" />
-              <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-64" />
-            </div>
-          </div>
+  {
+    state.loading ? (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-pulse">
+        <div className="space-y-5">
+          <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-52" />
+          <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-64" />
+        </div>
+        <div className="space-y-5">
+          <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-52" />
+          <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-64" />
+        </div>
+        <div className="space-y-5">
+          <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-52" />
+          <div className="bg-white/70 dark:bg-slate-800/70 rounded-2xl h-64" />
         </div>
       </div>
+    ) : (
+      <>
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+          {/* Column 1 */}
+          <div className="space-y-5">
+            <Calendar />
+            <ProjectDirectory />
+          </div>
+          {/* Column 2 */}
+          <div className="space-y-5">
+            <UrgentTasks />
+            <TeamDirectory />
+          </div>
+          {/* Column 3 */}
+          <div className="space-y-5">
+            <NewComments />
+            <NewBoardCard onClick={handleAddBoard} />
+          </div>
+        </div>
+
+        {/* Boards Section */}
+        <div>
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+            Your Boards
+          </h2>
+
+          {state.boards.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-center">
+              {/* ...empty state (unchanged)... */}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {state.boards.map((board) => (
+                <BoardCard key={board.id} board={board} />
+              ))}
+            </div>
+          )}
+        </div>
+      </>
     );
   }
 
@@ -158,23 +197,28 @@ const Dashboard = () => {
           type="text"
           value={boardTitle}
           onChange={(e) => setBoardTitle(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && createBoard()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !creating) handleCreateBoard();
+          }}
           placeholder="Board name..."
           autoFocus
+          disabled={creating}
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
         />
         <div className="flex justify-end gap-3">
           <button
             onClick={() => setNewBoardOpen(false)}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-gray-200"
+            disabled={creating}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-gray-200 disabled:opacity-60"
           >
             Cancel
           </button>
           <button
-            onClick={createBoard}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={handleCreateBoard}
+            disabled={creating}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
           >
-            Create Board
+            {creating ? "Creating…" : "Create Board"}
           </button>
         </div>
       </Modal>
