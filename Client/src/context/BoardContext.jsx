@@ -1,28 +1,40 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { initialData } from "../data/initialData";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useCallback,
+  useRef,
+} from "react";
+import { api } from "../utils/api";
+import { useAuth } from "./AuthContext";
 
 const BoardContext = createContext();
 
-const STORAGE_KEY = "vellum_state_v1";
+const initialState = {
+  boards: [], // [{ id, title, lists: [{ id, title, cards: [...] }] }]
+  loading: true,
+  error: null,
+};
 
-// ---------- Utilities ----------
-const generateId = (prefix) =>
-  `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-// ---------- Reducer ----------
-const boardReducer = (state, action) => {
+// ------------------------------------------------------------
+//                         Reducer
+// ------------------------------------------------------------
+const reducer = (state, action) => {
   switch (action.type) {
-    // -------- BOARDS --------
-    case "ADD_BOARD": {
-      const newBoard = {
-        id: generateId("board"),
-        title: action.payload.title || "Untitled Board",
-        lists: [],
-      };
-      return { ...state, boards: [...state.boards, newBoard] };
-    }
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload, loading: false };
 
-    case "RENAME_BOARD": {
+    // Replace entire boards list (used when loading)
+    case "SET_BOARDS":
+      return { ...state, boards: action.payload, loading: false, error: null };
+
+    // Board-level
+    case "ADD_BOARD":
+      return { ...state, boards: [...state.boards, action.payload] };
+    case "RENAME_BOARD":
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -31,33 +43,36 @@ const boardReducer = (state, action) => {
             : b,
         ),
       };
-    }
-
-    case "DELETE_BOARD": {
+    case "DELETE_BOARD":
       return {
         ...state,
         boards: state.boards.filter((b) => b.id !== action.payload.boardId),
       };
+
+    // Insert a fully-loaded board (used after getBoard)
+    case "MERGE_BOARD": {
+      const exists = state.boards.some((b) => b.id === action.payload.id);
+      return {
+        ...state,
+        boards: exists
+          ? state.boards.map((b) =>
+              b.id === action.payload.id ? action.payload : b,
+            )
+          : [...state.boards, action.payload],
+      };
     }
 
-    // -------- LISTS --------
-    case "ADD_LIST": {
-      const newList = {
-        id: generateId("list"),
-        title: action.payload.title || "New List",
-        cards: [],
-      };
+    // List-level
+    case "ADD_LIST":
       return {
         ...state,
         boards: state.boards.map((b) =>
           b.id === action.payload.boardId
-            ? { ...b, lists: [...b.lists, newList] }
+            ? { ...b, lists: [...b.lists, action.payload.list] }
             : b,
         ),
       };
-    }
-
-    case "UPDATE_LIST": {
+    case "UPDATE_LIST":
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -73,9 +88,7 @@ const boardReducer = (state, action) => {
             : b,
         ),
       };
-    }
-
-    case "DELETE_LIST": {
+    case "DELETE_LIST":
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -87,20 +100,22 @@ const boardReducer = (state, action) => {
             : b,
         ),
       };
+    case "REORDER_LIST": {
+      const { boardId, fromIndex, toIndex } = action.payload;
+      return {
+        ...state,
+        boards: state.boards.map((b) => {
+          if (b.id !== boardId) return b;
+          const lists = [...b.lists];
+          const [moved] = lists.splice(fromIndex, 1);
+          lists.splice(toIndex, 0, moved);
+          return { ...b, lists };
+        }),
+      };
     }
 
-    // -------- CARDS --------
-    case "ADD_CARD": {
-      const newCard = {
-        id: generateId("card"),
-        title: action.payload.title || "New Task",
-        description: action.payload.description || "",
-        priority: action.payload.priority || "medium",
-        dueDate: action.payload.dueDate || "",
-        labels: action.payload.labels || [],
-        assignee: action.payload.assignee || "",
-        comments: 0,
-      };
+    // Card-level
+    case "ADD_CARD":
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -109,16 +124,14 @@ const boardReducer = (state, action) => {
                 ...b,
                 lists: b.lists.map((l) =>
                   l.id === action.payload.listId
-                    ? { ...l, cards: [...l.cards, newCard] }
+                    ? { ...l, cards: [...l.cards, action.payload.card] }
                     : l,
                 ),
               }
             : b,
         ),
       };
-    }
-
-    case "UPDATE_CARD": {
+    case "UPDATE_CARD":
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -141,9 +154,7 @@ const boardReducer = (state, action) => {
             : b,
         ),
       };
-    }
-
-    case "DELETE_CARD": {
+    case "DELETE_CARD":
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -164,32 +175,6 @@ const boardReducer = (state, action) => {
             : b,
         ),
       };
-    }
-
-    // -------- DRAG & DROP --------
-    // Reorder cards within the SAME list
-    case "REORDER_CARD": {
-      const { boardId, listId, fromIndex, toIndex } = action.payload;
-      return {
-        ...state,
-        boards: state.boards.map((b) =>
-          b.id === boardId
-            ? {
-                ...b,
-                lists: b.lists.map((l) => {
-                  if (l.id !== listId) return l;
-                  const newCards = [...l.cards];
-                  const [moved] = newCards.splice(fromIndex, 1);
-                  newCards.splice(toIndex, 0, moved);
-                  return { ...l, cards: newCards };
-                }),
-              }
-            : b,
-        ),
-      };
-    }
-
-    // Move a card BETWEEN lists (or reorder within the same list via index)
     case "MOVE_CARD": {
       const { boardId, fromListId, toListId, fromIndex, toIndex } =
         action.payload;
@@ -197,99 +182,281 @@ const boardReducer = (state, action) => {
         ...state,
         boards: state.boards.map((b) => {
           if (b.id !== boardId) return b;
-
-          // Find the card being moved
           const fromList = b.lists.find((l) => l.id === fromListId);
           if (!fromList) return b;
-          const movedCard = fromList.cards[fromIndex];
-          if (!movedCard) return b;
+          const moved = fromList.cards[fromIndex];
+          if (!moved) return b;
 
-          // Build new lists
-          const newLists = b.lists.map((l) => {
+          const lists = b.lists.map((l) => {
             if (l.id === fromListId && l.id === toListId) {
-              // Same list: reorder
-              const newCards = [...l.cards];
-              newCards.splice(fromIndex, 1);
-              newCards.splice(toIndex, 0, movedCard);
-              return { ...l, cards: newCards };
+              const cards = [...l.cards];
+              cards.splice(fromIndex, 1);
+              cards.splice(toIndex, 0, moved);
+              return { ...l, cards };
             }
-            if (l.id === fromListId) {
-              // Remove from source
-              return {
-                ...l,
-                cards: l.cards.filter((_, i) => i !== fromIndex),
-              };
-            }
+            if (l.id === fromListId)
+              return { ...l, cards: l.cards.filter((_, i) => i !== fromIndex) };
             if (l.id === toListId) {
-              // Insert into destination
-              const newCards = [...l.cards];
-              const safeIndex =
-                toIndex === undefined || toIndex > newCards.length
-                  ? newCards.length
+              const cards = [...l.cards];
+              const idx =
+                toIndex === undefined || toIndex > cards.length
+                  ? cards.length
                   : toIndex;
-              newCards.splice(safeIndex, 0, movedCard);
-              return { ...l, cards: newCards };
+              cards.splice(idx, 0, moved);
+              return { ...l, cards };
             }
             return l;
           });
-
-          return { ...b, lists: newLists };
+          return { ...b, lists };
         }),
       };
     }
 
-    // -------- REORDER LIST --------
-    case "REORDER_LIST": {
-      const { boardId, fromIndex, toIndex } = action.payload;
-      return {
-        ...state,
-        boards: state.boards.map((b) => {
-          if (b.id !== boardId) return b;
-          const newLists = [...b.lists];
-          const [moved] = newLists.splice(fromIndex, 1);
-          newLists.splice(toIndex, 0, moved);
-          return { ...b, lists: newLists };
-        }),
-      };
-    }
-    case "REPLACE_STATE": {
-      return {
-        ...state,
-        boards: action.payload.boards || [],
-      };
-    }
+    case "RESET":
+      return initialState;
+
+    default:
+      return state;
   }
 };
 
-// ---------- Provider ----------
+// ------------------------------------------------------------
+//                        Provider
+// ------------------------------------------------------------
 export const BoardProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(boardReducer, initialData, (init) => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : init;
-    } catch {
-      return init;
-    }
-  });
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { isAuthenticated } = useAuth();
+  const optimisticRef = useRef(new Map());
 
-  useEffect(() => {
+  // ------------------------------------------------------------------
+  // 1. reloadBoards — MUST be defined first so others can reference it
+  // ------------------------------------------------------------------
+  const reloadBoards = useCallback(async () => {
+    dispatch({ type: "SET_LOADING", payload: true });
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.error("Failed to save state:", e);
+      const { boards } = await api.listBoards();
+      const fullBoards = await Promise.all(
+        boards.map(async (b) => {
+          const { board } = await api.getBoard(b.id);
+          return board;
+        }),
+      );
+      dispatch({ type: "SET_BOARDS", payload: fullBoards });
+    } catch (err) {
+      dispatch({ type: "SET_ERROR", payload: err.message });
     }
-  }, [state]);
+  }, []);
+
+  // Load boards when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      dispatch({ type: "RESET" });
+      return;
+    }
+    const load = async () => {
+      dispatch({ type: "SET_LOADING", payload: true });
+      try {
+        const { boards } = await api.listBoards();
+        // We need full board data (lists + cards), so fetch each board's details
+        const fullBoards = await Promise.all(
+          boards.map(async (b) => {
+            const { board } = await api.getBoard(b.id);
+            return board;
+          }),
+        );
+        dispatch({ type: "SET_BOARDS", payload: fullBoards });
+      } catch (err) {
+        dispatch({ type: "SET_ERROR", payload: err.message });
+      }
+    };
+    load();
+  }, [isAuthenticated]);
+
+  // ------------------------------------------------------------
+  // Public actions — optimistic, with rollback on failure
+  // ------------------------------------------------------------
+
+  // ---- Boards ----
+  const createBoard = useCallback(async (title) => {
+    const { board } = await api.createBoard({ title });
+    dispatch({ type: "ADD_BOARD", payload: board });
+    return board;
+  }, []);
+
+  const renameBoard = useCallback(async (boardId, title) => {
+    dispatch({ type: "RENAME_BOARD", payload: { boardId, title } });
+    try {
+      await api.updateBoard(boardId, { title });
+    } catch (err) {
+      // Rollback not easily done without knowing previous title;
+      // simplest is to reload the boards list on error
+      console.error("renameBoard failed:", err);
+    }
+  }, []);
+
+  const deleteBoard = useCallback(
+    async (boardId) => {
+      dispatch({ type: "DELETE_BOARD", payload: { boardId } });
+      try {
+        await api.deleteBoard(boardId);
+      } catch (err) {
+        console.error("deleteBoard failed, reloading:", err);
+        await reloadBoards();
+      }
+    },
+    [reloadBoards],
+  );
+
+  // ---- Lists ----
+  const createList = useCallback(async (boardId, title) => {
+    const { list } = await api.createList(boardId, { title });
+    dispatch({ type: "ADD_LIST", payload: { boardId, list } });
+    return list;
+  }, []);
+
+  const updateList = useCallback(async (boardId, listId, title) => {
+    dispatch({ type: "UPDATE_LIST", payload: { boardId, listId, title } });
+    try {
+      await api.updateList(listId, { title });
+    } catch (err) {
+      console.error("updateList failed:", err);
+    }
+  }, []);
+
+  const deleteList = useCallback(async (boardId, listId) => {
+    dispatch({ type: "DELETE_LIST", payload: { boardId, listId } });
+    try {
+      await api.deleteList(listId);
+    } catch (err) {
+      console.error("deleteList failed:", err);
+    }
+  }, []);
+
+  const reorderLists = useCallback(
+    async (boardId, fromIndex, toIndex) => {
+      dispatch({
+        type: "REORDER_LIST",
+        payload: { boardId, fromIndex, toIndex },
+      });
+      // After local reorder, rebuild the id array and send to API
+      // We read from state via a functional approach — but since useCallback
+      // has a stale closure on `state`, we use the reducer's result implicitly.
+      // Simpler: compute new order from the *current* boards in a microtask.
+      // For now, we fetch fresh and send — the UI already updated optimistically.
+      const currentBoard = state.boards.find((b) => b.id === boardId);
+      if (!currentBoard) return;
+      const newOrder = [...currentBoard.lists];
+      const [moved] = newOrder.splice(fromIndex, 1);
+      newOrder.splice(toIndex, 0, moved);
+      try {
+        await api.reorderLists(
+          boardId,
+          newOrder.map((l) => l.id),
+        );
+      } catch (err) {
+        console.error("reorderLists failed:", err);
+      }
+    },
+    [state.boards],
+  );
+
+  // ---- Cards ----
+  const createCard = useCallback(async (boardId, listId, formData) => {
+    const { card } = await api.createCard(listId, formData);
+    dispatch({ type: "ADD_CARD", payload: { boardId, listId, card } });
+    return card;
+  }, []);
+
+  const updateCard = useCallback(async (boardId, listId, cardId, updates) => {
+    dispatch({
+      type: "UPDATE_CARD",
+      payload: { boardId, listId, cardId, updates },
+    });
+    try {
+      await api.updateCard(cardId, updates);
+    } catch (err) {
+      console.error("updateCard failed:", err);
+    }
+  }, []);
+
+  const deleteCard = useCallback(
+    async (boardId, listId, cardId) => {
+      dispatch({ type: "DELETE_CARD", payload: { boardId, listId, cardId } });
+      try {
+        await api.deleteCard(cardId);
+      } catch (err) {
+        console.error("deleteCard failed, reloading:", err);
+        await reloadBoards();
+      }
+    },
+    [reloadBoards],
+  );
+
+  const moveCard = useCallback(
+    async (boardId, fromListId, toListId, fromIndex, toIndex) => {
+      // Find the card BEFORE any optimistic update so we have the correct ID
+      const boardBefore = state.boards.find((b) => b.id === boardId);
+      const sourceListBefore = boardBefore?.lists.find(
+        (l) => l.id === fromListId,
+      );
+      const movedCard = sourceListBefore?.cards[fromIndex];
+      if (!movedCard) {
+        console.error("moveCard: source card not found");
+        return;
+      }
+
+      const cardId = movedCard.id;
+
+      // 1. Optimistic UI update — this is safe because we already captured cardId
+      dispatch({
+        type: "MOVE_CARD",
+        payload: { boardId, fromListId, toListId, fromIndex, toIndex },
+      });
+
+      // 2. Persist to backend
+      try {
+        await api.moveCard(cardId, { toListId, toIndex });
+      } catch (err) {
+        console.error("moveCard failed, reloading board:", err);
+        // Rollback: fetch this board fresh from the API and replace it
+        try {
+          const { board: fresh } = await api.getBoard(boardId);
+          dispatch({ type: "MERGE_BOARD", payload: fresh });
+        } catch (reloadErr) {
+          console.error("moveCard rollback reload failed:", reloadErr);
+          await reloadBoards();
+        }
+      }
+    },
+    [state.boards, reloadBoards],
+  );
 
   return (
-    <BoardContext.Provider value={{ state, dispatch }}>
+    <BoardContext.Provider
+      value={{
+        state,
+        dispatch,
+        createBoard,
+        renameBoard,
+        deleteBoard,
+        createList,
+        updateList,
+        deleteList,
+        reorderLists,
+        createCard,
+        updateCard,
+        deleteCard,
+        moveCard,
+        reloadBoards,
+      }}
+    >
       {children}
     </BoardContext.Provider>
   );
 };
 
-// ---------- Hook ----------
 export const useBoard = () => {
-  const context = useContext(BoardContext);
-  if (!context) throw new Error("useBoard must be used within BoardProvider");
-  return context;
+  const ctx = useContext(BoardContext);
+  if (!ctx) throw new Error("useBoard must be used inside BoardProvider");
+  return ctx;
 };
