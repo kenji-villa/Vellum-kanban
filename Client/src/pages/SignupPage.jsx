@@ -9,7 +9,7 @@ import { useToast } from "../context/ToastContext";
 const SignupPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const { signup, loading } = useAuth();
+  const { signup, authLoading } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
@@ -42,12 +42,12 @@ const SignupPage = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-      const session = await signup({
+      const user = await signup({
         name: form.name.trim(),
         email: form.email,
         password: form.password,
       });
-      toast.success(`Welcome to Vellum, ${session.name}!`);
+      toast.success(`Welcome to Vellum, ${user.name}!`);
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setErrors({ general: err.message });
@@ -202,7 +202,7 @@ const SignupPage = () => {
           )}
         </div>
 
-        <AuthButton type="submit" variant="orange" loading={loading}>
+        <AuthButton type="submit" variant="orange" loading={authLoading}>
           Create Account
         </AuthButton>
 

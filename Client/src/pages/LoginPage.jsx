@@ -10,7 +10,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
-  const { login, loading } = useAuth();
+  const { login, authLoading } = useAuth();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(true);
@@ -35,8 +35,8 @@ const LoginPage = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-      const session = await login(form);
-      toast.success(`Welcome back, ${session.name}!`);
+      const user = await login(form);
+      toast.success(`Welcome back, ${user.name}!`);
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setErrors({ general: err.message });
@@ -131,7 +131,7 @@ const LoginPage = () => {
           </button>
         </div>
 
-        <AuthButton type="submit" loading={loading}>
+        <AuthButton type="submit" loading={authLoading}>
           Sign In
         </AuthButton>
 
