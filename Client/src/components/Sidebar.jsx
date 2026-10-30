@@ -118,7 +118,7 @@ const Sidebar = () => {
               const active = isActive || isProjects;
               return `w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
                 active
-                  ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30"
+                  ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent-ring)]"
                   : "text-white/60 hover:bg-white/10 hover:text-white"
               }`;
             }}

@@ -1,5 +1,45 @@
 @import "tailwindcss";
 
+/* --- Accent Color System --- */
+:root {
+  --accent: #f97316; /* default orange */
+  --accent-hover: #ea580c;
+  --accent-soft: rgba(249, 115, 22, 0.1);
+  --accent-ring: rgba(249, 115, 22, 0.3);
+}
+
+/* Accent overrides applied by JS when the setting changes */
+:root[data-accent="orange"] {
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-soft: rgba(249, 115, 22, 0.1);
+  --accent-ring: rgba(249, 115, 22, 0.3);
+}
+:root[data-accent="blue"] {
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-soft: rgba(59, 130, 246, 0.1);
+  --accent-ring: rgba(59, 130, 246, 0.3);
+}
+:root[data-accent="purple"] {
+  --accent: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --accent-soft: rgba(139, 92, 246, 0.1);
+  --accent-ring: rgba(139, 92, 246, 0.3);
+}
+:root[data-accent="emerald"] {
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-soft: rgba(16, 185, 129, 0.1);
+  --accent-ring: rgba(16, 185, 129, 0.3);
+}
+:root[data-accent="rose"] {
+  --accent: #f43f5e;
+  --accent-hover: #e11d48;
+  --accent-soft: rgba(244, 63, 94, 0.1);
+  --accent-ring: rgba(244, 63, 94, 0.3);
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @keyframes slide-in {

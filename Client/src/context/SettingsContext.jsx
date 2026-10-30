@@ -34,7 +34,6 @@ export const SettingsProvider = ({ children }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
-  // Apply theme to <html>
   useEffect(() => {
     const root = document.documentElement;
     const shouldBeDark =
@@ -43,6 +42,22 @@ export const SettingsProvider = ({ children }) => {
         window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     root.classList.toggle("dark", shouldBeDark);
+  }, [settings.theme]);
+
+  // Apply accent color
+  useEffect(() => {
+    document.documentElement.setAttribute("data-accent", settings.accent);
+  }, [settings.accent]);
+
+  // System theme change listener
+  useEffect(() => {
+    if (settings.theme !== "system") return;
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      document.documentElement.classList.toggle("dark", mql.matches);
+    };
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
   }, [settings.theme]);
 
   const updateSetting = (key, value) =>

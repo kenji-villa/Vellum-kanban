@@ -80,7 +80,7 @@ const AvatarUploader = ({ size = "large" }) => {
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className={`relative rounded-full bg-orange-500 border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold shadow-xl shrink-0 overflow-hidden group ${dimensions[size]}`}
+        className={`relative rounded-full bg-[var(--accent)] border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold shadow-xl shrink-0 overflow-hidden group ${dimensions[size]}`}
         title="Change profile picture"
       >
         {avatarUrl ? (
@@ -161,7 +161,7 @@ const AvatarUploader = ({ size = "large" }) => {
               step={0.1}
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-full accent-orange-500"
+              className="w-full [var(--accent)]"
             />
           </div>
 

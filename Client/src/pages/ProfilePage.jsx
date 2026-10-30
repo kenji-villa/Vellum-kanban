@@ -102,7 +102,7 @@ const ProfilePage = () => {
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="px-4 py-2 rounded-lg text-sm bg-orange-500 text-white disabled:opacity-50"
+                      className="px-4 py-2 rounded-lg text-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white disabled:opacity-50"
                     >
                       {saving ? "Saving..." : "Save Changes"}
                     </button>
@@ -116,7 +116,7 @@ const ProfilePage = () => {
                     {user?.name || "Unnamed"}
                   </h1>
                   {user?.title && (
-                    <p className="text-sm text-orange-500 font-medium mt-1">
+                    <p className="text-sm text-[var(--accent)] font-medium mt-1">
                       {user.title}
                     </p>
                   )}

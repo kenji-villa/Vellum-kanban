@@ -76,9 +76,29 @@ const TabAppearance = () => {
             />
           ))}
         </div>
-        <p className="text-[11px] text-gray-400 mt-2">
-          Accent is coming soon — currently uses brand orange.
+      </div>
+
+      {/* Live Preview */}
+      <div className="mt-5 p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900">
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
+          Preview
         </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-white text-xs font-bold">
+            ET
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              Accent Preview
+            </p>
+            <p className="text-xs text-[var(--accent)] font-medium">
+              This is how it looks
+            </p>
+          </div>
+          <button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+            Save
+          </button>
+        </div>
       </div>
 
       {/* Compact mode */}

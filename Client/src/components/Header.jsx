@@ -49,7 +49,7 @@ const Header = () => {
         <button
           onClick={() => navigate("/profile")}
           title="View profile"
-          className="w-9 h-9 rounded-full bg-orange-500 hover:opacity-90 flex items-center justify-center text-white text-xs font-bold transition-opacity ring-2 ring-transparent hover:ring-orange-300 dark:hover:ring-orange-500/40 overflow-hidden"
+          className="w-9 h-9 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] flex items-center justify-center text-white text-xs font-bold transition-opacity ring-2 ring-transparent hover:ring-[var(--accent-ring)] overflow-hidden"
         >
           {avatarUrl ? (
             <img

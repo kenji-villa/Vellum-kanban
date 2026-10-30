@@ -38,7 +38,7 @@ const Settings = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors -mb-px ${
                   activeTab === tab.id
-                    ? "border-orange-500 text-gray-900 dark:text-gray-100"
+                    ? "border-[var(--accent)] text-gray-900 dark:text-gray-100"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                 }`}
               >
