@@ -10,13 +10,13 @@ const defaultSettings = {
   userBio:
     "I'm a Product Designer based in Melbourne, Australia. I specialise in UX/UI design, brand strategy, and Webflow development.",
   userInitials: "JR",
-  theme: "light", // "light" | "dark" | "system"
-  accent: "orange", // "orange" | "blue" | "purple" | "emerald" | "rose"
+  userBanner: "",
+  theme: "light",
+  accent: "orange",
   defaultPriority: "medium",
   defaultLabels: [],
   compactMode: false,
 };
-
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState(() => {
     try {
