@@ -18,7 +18,7 @@ const LandingHero = () => {
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 text-center">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 mb-8 animate-fade-up delay-100">
           <span className="bg-[#1e2757] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
             NEW
           </span>
@@ -28,7 +28,7 @@ const LandingHero = () => {
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-[1.05]">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-[1.05] animate-blur-reveal delay-200">
           Your daily tasks,
           <br />
           <span className="bg-gradient-to-r from-[#1e2757] via-orange-500 to-[#1e2757] bg-clip-text text-transparent dark:from-orange-400 dark:via-orange-300 dark:to-orange-400">
@@ -37,14 +37,14 @@ const LandingHero = () => {
         </h1>
 
         {/* Subtext */}
-        <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed animate-fade-up delay-300">
           Vellum helps you manage daily tasks, assign teammates, and track
           progress — all in a simple, fast, and visual workspace. No accounts,
           no servers, all local.
         </p>
 
         {/* CTAs */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up delay-400">
           <Link
             to="/signup"
             className="bg-[#1e2757] hover:bg-[#151c45] text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors shadow-lg shadow-[#1e2757]/20"
@@ -60,7 +60,7 @@ const LandingHero = () => {
         </div>
 
         {/* Product Preview Mock */}
-        <div className="mt-16 lg:mt-20 relative">
+        <div className="mt-16 lg:mt-20 relative animate-fade-up delay-500">
           <div className="relative mx-auto max-w-5xl">
             {/* Floating notification card */}
             <div className="hidden lg:block absolute -top-6 -right-10 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-4 text-left rotate-3">
@@ -146,7 +146,7 @@ const LandingHero = () => {
         </div>
 
         {/* Stats row */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-fade-up delay-500">
           <Stat value="100%" label="Local-first" />
           <Stat value="0 ms" label="Setup time" />
           <Stat value="∞" label="Boards & cards" />

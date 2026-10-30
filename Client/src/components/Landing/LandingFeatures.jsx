@@ -1,4 +1,5 @@
 import React from "react";
+import { useScrollReveal } from "../../hooks/useScrollReveal";
 
 const FEATURES = [
   {
@@ -134,42 +135,49 @@ const FEATURES = [
   },
 ];
 
-const LandingFeatures = () => (
-  <section id="features" className="py-20 lg:py-32">
-    <div className="max-w-7xl mx-auto px-6 lg:px-8">
-      <div className="text-center max-w-2xl mx-auto mb-16">
-        <div className="inline-block text-xs font-bold text-orange-500 uppercase tracking-widest mb-3">
-          Everything You Need
-        </div>
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-          Powerful features, zero clutter
-        </h2>
-        <p className="mt-4 text-base text-gray-600 dark:text-gray-400">
-          Vellum gives you exactly what you need to organize work — nothing
-          more, nothing less.
-        </p>
-      </div>
+const LandingFeatures = () => {
+  const { elementRef, isVisible } = useScrollReveal();
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {FEATURES.map((f) => (
-          <div
-            key={f.title}
-            className="group p-6 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-700 hover:shadow-lg hover:shadow-orange-500/5 transition-all"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#1e2757] text-white flex items-center justify-center mb-5 group-hover:bg-orange-500 transition-colors">
-              {f.icon}
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {f.title}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              {f.description}
-            </p>
+  return (
+    <section id="features" className="py-20 lg:py-32" ref={elementRef}>
+      <div
+        className={`max-w-7xl mx-auto px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? "opacity-100" : "opacity-0"}`}
+      >
+        <div className="text-center max-w-2xl mx-auto mb-16 reveal-element is-visible">
+          <div className="inline-block text-xs font-bold text-orange-500 uppercase tracking-widest mb-3">
+            Everything You Need
           </div>
-        ))}
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+            Powerful features, zero clutter
+          </h2>
+          <p className="mt-4 text-base text-gray-600 dark:text-gray-400">
+            Vellum gives you exactly what you need to organize work — nothing
+            more, nothing less.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((f, i) => (
+            <div
+              key={f.title}
+              className={`reveal-element ${isVisible ? "is-visible" : ""} group p-6 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-700 hover:shadow-lg hover:shadow-orange-500/5 transition-all`}
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
+              <div className="w-12 h-12 rounded-xl bg-[#1e2757] text-white flex items-center justify-center mb-5 group-hover:bg-orange-500 transition-colors">
+                {f.icon}
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {f.title}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                {f.description}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default LandingFeatures;
