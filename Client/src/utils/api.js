@@ -13,7 +13,10 @@ class ApiError extends Error {
   }
 }
 
+
+
 const request = async (path, { method = "GET", body, auth = true } = {}) => {
+  
   const headers = { "Content-Type": "application/json" };
   if (auth) {
     const token = getToken();
@@ -45,6 +48,7 @@ const request = async (path, { method = "GET", body, auth = true } = {}) => {
       data
     );
   }
+
 
   return data;
 };
@@ -86,6 +90,26 @@ export const api = {
   deleteCard: (id) => request(`/cards/${id}`, { method: "DELETE" }),
   moveCard: (id, payload) =>
     request(`/cards/${id}/move`, { method: "PATCH", body: payload }),
+
+  //Profile------------------------
+
+  updateProfile: (payload) => request("/users/me", { method: "PATCH", body: payload }),
+  
+  uploadBanner: async (file) => {
+    const formData = new FormData();
+    formData.append("banner", file);
+    
+    const token = getToken();
+    const res = await fetch(`${BASE_URL}/users/me/banner`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData, // Browser sets Content-Type to multipart/form-data automatically
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new ApiError(data.message || "Upload failed", res.status, data);
+    return data;
+  },
 };
 
 export { ApiError };
