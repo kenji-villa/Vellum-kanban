@@ -1,45 +1,53 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-
-const navLinks = [
-  { name: "Dashboard", path: "/dashboard" },
-  { name: "Projects", path: "/board/board-1" },
-  { name: "Team", path: "/settings" },
-  { name: "Settings", path: "/settings" },
-];
+import { NavLink, useNavigate } from "react-router-dom";
+import NotificationBell from "./UI/NotificationBell";
+import { useSettings } from "../context/SettingsContext";
 
 const Header = () => {
-  return (
-    <header className="h-16 bg-gray-100 flex items-center justify-between px-8 border-b border-gray-200">
-      <h1 className="text-xl font-bold text-gray-800 tracking-tight">Vellum</h1>
+  const { settings } = useSettings();
+  const navigate = useNavigate();
 
-      <div className="flex items-center gap-8">
+  const initials = (settings.userName || "?")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <header className="h-16 bg-gray-100 dark:bg-[#0f172a] flex items-center justify-between px-8 border-b border-gray-200 dark:border-slate-800 shrink-0">
+      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
+        Vellum
+      </h1>
+
+      <div className="flex items-center gap-4">
+        {/* Team link only */}
         <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.name}
-              to={link.path}
-              className={({ isActive }) =>
-                `text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-900"
-                }`
-              }
-            >
-              {link.name}
-            </NavLink>
-          ))}
+          <NavLink
+            to="/team"
+            className={({ isActive }) =>
+              `text-sm font-medium transition-colors ${
+                isActive
+                  ? "text-gray-900 dark:text-gray-100"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              }`
+            }
+          >
+            Team
+          </NavLink>
         </nav>
 
-        <div className="flex items-center -space-x-2">
-          <div className="w-8 h-8 rounded-full bg-pink-400 border-2 border-gray-100 flex items-center justify-center text-white text-xs font-bold">
-            S
-          </div>
-          <div className="w-8 h-8 rounded-full bg-indigo-500 border-2 border-gray-100 flex items-center justify-center text-white text-xs font-bold">
-            B
-          </div>
-        </div>
+        {/* Notifications */}
+        <NotificationBell />
+
+        {/* User avatar — navigates to profile page */}
+        <button
+          onClick={() => navigate("/profile")}
+          title="View profile"
+          className="w-9 h-9 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center text-white text-xs font-bold transition-colors ring-2 ring-transparent hover:ring-orange-300 dark:hover:ring-orange-500/40"
+        >
+          {initials}
+        </button>
       </div>
     </header>
   );
