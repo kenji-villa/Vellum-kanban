@@ -17,6 +17,8 @@ import BoardPage from "./pages/BoardPage";
 import Settings from "./pages/Settings";
 import CalendarPage from "./pages/CalendarPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import TeamPage from "./pages/TeamPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -66,10 +68,26 @@ function App() {
                     }
                   />
                   <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/settings"
                     element={
                       <ProtectedRoute>
                         <Settings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/team"
+                    element={
+                      <ProtectedRoute>
+                        <TeamPage />
                       </ProtectedRoute>
                     }
                   />
