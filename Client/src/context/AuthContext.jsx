@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       try {
+        // Always fetch fresh user data from the backend
         const { user } = await api.me();
         setUser(user);
       } catch {
@@ -58,6 +59,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (updates) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : null));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -67,6 +72,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
+        updateUser,
         isAuthenticated: !!user,
       }}
     >

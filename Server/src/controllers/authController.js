@@ -7,7 +7,10 @@ const sanitizeUser = (user) => ({
   id: user.id,
   name: user.name,
   email: user.email,
-  createdAt: user.createdAt,
+  title: user.title,       
+  bio: user.bio,           
+  bannerUrl: user.bannerUrl, 
+  createdAt: user.createdAt
 });
 
 // POST /api/auth/signup
@@ -74,6 +77,7 @@ export const login = async (req, res) => {
 };
 
 // GET /api/auth/me
+// GET /api/auth/me
 export const me = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -86,7 +90,7 @@ export const me = async (req, res) => {
 
     res.json({ user: sanitizeUser(user) });
   } catch (err) {
-    console.error("me error:", err);
-    res.status(500).json({ message: "Something went wrong" });
+    console.error("AUTH ME ERROR DETAILS:", err); 
+    res.status(500).json({ message: err.message || "Something went wrong" });
   }
 };
