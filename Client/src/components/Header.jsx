@@ -2,12 +2,13 @@ import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import NotificationBell from "./UI/NotificationBell";
 import { useSettings } from "../context/SettingsContext";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
-  const { settings } = useSettings();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const initials = (settings.userName || "?")
+  const initials = (user?.name || "?")
     .split(" ")
     .map((n) => n[0])
     .join("")
