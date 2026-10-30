@@ -16,6 +16,7 @@ model User {
   bannerUrl String?
   bio       String?
   title     String?
+  avatarUrl String?
   boards    Board[]
 
   @@map("users")

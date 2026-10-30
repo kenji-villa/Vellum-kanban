@@ -1,7 +1,6 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import NotificationBell from "./UI/NotificationBell";
-import { useSettings } from "../context/SettingsContext";
 import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
@@ -14,6 +13,11 @@ const Header = () => {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const API_BASE =
+    import.meta.env.VITE_API_URL?.replace("/api", "") ||
+    "http://localhost:4000";
+  const avatarUrl = user?.avatarUrl ? `${API_BASE}${user.avatarUrl}` : null;
 
   return (
     <header className="h-16 bg-gray-100 dark:bg-[#0f172a] flex items-center justify-between px-8 border-b border-gray-200 dark:border-slate-800 shrink-0">
@@ -45,9 +49,17 @@ const Header = () => {
         <button
           onClick={() => navigate("/profile")}
           title="View profile"
-          className="w-9 h-9 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center text-white text-xs font-bold transition-colors ring-2 ring-transparent hover:ring-orange-300 dark:hover:ring-orange-500/40"
+          className="w-9 h-9 rounded-full bg-orange-500 hover:opacity-90 flex items-center justify-center text-white text-xs font-bold transition-opacity ring-2 ring-transparent hover:ring-orange-300 dark:hover:ring-orange-500/40 overflow-hidden"
         >
-          {initials}
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={user?.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            initials
+          )}
         </button>
       </div>
     </header>

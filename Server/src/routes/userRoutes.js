@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { updateMe, uploadBanner } from "../controllers/userController.js";
+import { updateMe, uploadBanner,uploadAvatar  } from "../controllers/userController.js";
 
 const router = Router();
 
@@ -35,5 +35,6 @@ const upload = multer({
 
 router.patch("/me", updateMe);
 router.post("/me/banner", upload.single("banner"), uploadBanner);
+router.post("/me/avatar", upload.single("avatar"), uploadAvatar);
 
 export default router;

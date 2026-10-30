@@ -5,6 +5,7 @@ import BannerUploader from "../components/Profile/BannerUploader";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../utils/api";
+import AvatarUploader from "../components/Profile/AvatarUploader";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -80,10 +81,8 @@ const ProfilePage = () => {
             <BannerUploader />
 
             <div className="px-6 pb-6">
-              <div className="-mt-13 relative z-10 flex items-end justify-between gap-4 mb-5">
-                <div className="w-28 h-28 rounded-full bg-orange-500 border-4 border-white dark:border-slate-800 flex items-center justify-center text-white text-3xl font-bold shadow-xl shrink-0">
-                  {initials}
-                </div>
+              <div className="-mt-14 relative z-10 flex items-end justify-between gap-4 mb-5">
+                <AvatarUploader size="large" />
 
                 {!editing ? (
                   <button

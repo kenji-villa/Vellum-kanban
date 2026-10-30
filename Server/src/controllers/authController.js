@@ -9,7 +9,8 @@ const sanitizeUser = (user) => ({
   email: user.email,
   title: user.title,       
   bio: user.bio,           
-  bannerUrl: user.bannerUrl, 
+  bannerUrl: user.bannerUrl,
+  avatarUrl: user.avatarUrl, 
   createdAt: user.createdAt
 });
 

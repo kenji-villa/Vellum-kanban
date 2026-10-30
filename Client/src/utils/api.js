@@ -110,6 +110,23 @@ export const api = {
     if (!res.ok) throw new ApiError(data.message || "Upload failed", res.status, data);
     return data;
   },
+
+  uploadAvatar: async (file) => {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const token = getToken();
+  const res = await fetch(`${BASE_URL}/users/me/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new ApiError(data.message || "Upload failed", res.status, data);
+  return data;
+},
+
 };
 
 export { ApiError };
