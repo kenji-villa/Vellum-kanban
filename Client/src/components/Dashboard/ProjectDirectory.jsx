@@ -60,13 +60,6 @@ const ProjectDirectory = () => {
           })}
         </ul>
       )}
-
-      <Link
-        to="/dashboard"
-        className="mt-4 block w-full text-center border border-gray-200 rounded-lg py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors"
-      >
-        + Add more
-      </Link>
     </div>
   );
 };
