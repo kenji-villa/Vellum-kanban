@@ -33,7 +33,7 @@ const Header = () => {
             className={({ isActive }) =>
               `text-sm font-medium transition-colors ${
                 isActive
-                  ? "text-gray-900 dark:text-gray-100"
+                  ? "text-[var(--accent)]"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               }`
             }

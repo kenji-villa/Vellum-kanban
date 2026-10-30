@@ -212,7 +212,7 @@ const ProjectProgress = ({ boards }) => {
         </p>
         <div className="flex items-center gap-3">
           <LegendDot color="bg-[#1e2757]" label="Lists" />
-          <LegendDot color="bg-orange-500" label="Cards" />
+          <LegendDot color="bg-[var(--accent)]" label="Cards" />
         </div>
       </div>
 
@@ -254,7 +254,7 @@ const ProjectProgress = ({ boards }) => {
                     style={{
                       left: `${Math.min(listPct, 90)}%`,
                       width: `${Math.max(cardPct * 0.4, 4)}%`,
-                      backgroundColor: "#f97316",
+                      backgroundColor: "var(--accent)",
                     }}
                   />
                 </div>

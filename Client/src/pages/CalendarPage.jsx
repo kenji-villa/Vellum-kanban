@@ -209,7 +209,7 @@ const MonthView = ({ cursor, eventsFor, onEventClick }) => {
                 <span
                   className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
                     today
-                      ? "bg-orange-500 text-white"
+                      ? "bg-[var(--accent)] text-white"
                       : inMonth
                         ? "text-gray-700 dark:text-gray-200"
                         : "text-gray-300 dark:text-slate-600"
@@ -265,7 +265,7 @@ const WeekView = ({ cursor, eventsFor, onEventClick }) => {
             <div
               key={day.toISOString()}
               className={`py-3 text-center ${
-                today ? "bg-orange-50 dark:bg-orange-900/20" : ""
+                today ? "bg-[var(--accent-soft)]" : ""
               }`}
             >
               <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
@@ -273,7 +273,9 @@ const WeekView = ({ cursor, eventsFor, onEventClick }) => {
               </p>
               <p
                 className={`text-lg font-bold ${
-                  today ? "text-orange-500" : "text-gray-800 dark:text-gray-100"
+                  today
+                    ? "text-[var(--accent)]"
+                    : "text-gray-800 dark:text-gray-100"
                 }`}
               >
                 {format(day, "d")}
@@ -305,7 +307,7 @@ const WeekView = ({ cursor, eventsFor, onEventClick }) => {
             <div
               key={day.toISOString()}
               className={`relative border-r border-gray-100 dark:border-slate-700 last:border-r-0 ${
-                today ? "bg-orange-50/40 dark:bg-orange-900/10" : ""
+                today ? "bg-[var(--accent-soft)]" : ""
               }`}
             >
               {HOURS.map((h) => (

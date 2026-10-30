@@ -34,7 +34,7 @@ const NotificationBell = () => {
           />
         </svg>
         {/* Unread dot placeholder — hidden until notifications exist */}
-        {/* <span className="absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full" /> */}
+        {/* <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--accent)] rounded-full" /> */}
       </button>
 
       {open && (
