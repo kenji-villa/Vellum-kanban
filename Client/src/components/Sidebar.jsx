@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useSettings } from "../context/SettingsContext";
 import { useBoard } from "../context/BoardContext";
 import { useAuth } from "../context/AuthContext";
@@ -15,6 +15,7 @@ const Sidebar = () => {
   // Resolve which board the "Projects" link should point to
   const firstBoard = state.boards[0];
   const projectsPath = firstBoard ? `/board/${firstBoard.id}` : "/dashboard";
+  const { pathname } = useLocation();
 
   const navItems = [
     {
@@ -54,8 +55,8 @@ const Sidebar = () => {
     },
     {
       name: "Projects",
-      path: projectsPath,
-      matchPattern: /^\/board\//,
+      path: "/projects",
+      matchPattern: /^\/(board|projects)(\/|$)/,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -111,11 +112,9 @@ const Sidebar = () => {
             title={item.name}
             end={item.path === "/dashboard"}
             className={({ isActive }) => {
-              // Custom active check for dynamic paths (Projects)
-              const isProjects =
-                item.matchPattern &&
-                item.matchPattern.test(window.location.pathname);
-              const active = isActive || isProjects;
+              const active = item.matchPattern
+                ? item.matchPattern.test(pathname)
+                : isActive;
               return `w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
                 active
                   ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent-ring)]"
