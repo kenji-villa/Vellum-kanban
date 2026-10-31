@@ -19,6 +19,7 @@ import CalendarPage from "./pages/CalendarPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import TeamPage from "./pages/TeamPage";
 import ProfilePage from "./pages/ProfilePage";
+import ProjectsRedirect from "./pages/ProjectsRedirect";
 
 function App() {
   return (
@@ -40,6 +41,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/projects"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectsRedirect />
                       </ProtectedRoute>
                     }
                   />
