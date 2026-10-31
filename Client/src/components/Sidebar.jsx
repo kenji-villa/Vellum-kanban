@@ -1,20 +1,15 @@
 import React from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useSettings } from "../context/SettingsContext";
-import { useBoard } from "../context/BoardContext";
 import { useAuth } from "../context/AuthContext";
+import QuickCreate from "./QuickCreate";
 
 const iconClass = "w-5 h-5";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const { settings, updateSetting } = useSettings();
-  const { state } = useBoard();
   const { logout } = useAuth();
-
-  // Resolve which board the "Projects" link should point to
-  const firstBoard = state.boards[0];
-  const projectsPath = firstBoard ? `/board/${firstBoard.id}` : "/dashboard";
   const { pathname } = useLocation();
 
   const navItems = [
@@ -102,7 +97,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen h-screen sticky top-0 justify-between shrink-0">
+    <aside className="w-20 z-40 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen h-screen sticky top-0 justify-between shrink-0">
       {/* Top Icons */}
       <div className="flex flex-col items-center gap-4">
         {navItems.map((item) => (
@@ -127,29 +122,7 @@ const Sidebar = () => {
         ))}
 
         {/* Add button */}
-        <button
-          onClick={() => {
-            if (firstBoard) navigate(`/board/${firstBoard.id}`);
-            else navigate("/dashboard");
-          }}
-          title="New"
-          className="w-11 h-11 flex items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.8}
-            stroke="currentColor"
-            className={iconClass}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
-          </svg>
-        </button>
+        <QuickCreate />
       </div>
 
       {/* Bottom Icons */}
