@@ -63,12 +63,25 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
+  const googleLogin = async (credential) => {
+    setAuthLoading(true);
+    try {
+      const { user, token } = await api.googleLogin(credential);
+      setToken(token);
+      setUser(user);
+      return user;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
         authLoading,
+        googleLogin,
         login,
         signup,
         logout,
