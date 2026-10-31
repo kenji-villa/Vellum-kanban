@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import prisma from "../prisma.js";
 import { signToken } from "../utils/jwt.js";
 import { signupSchema, loginSchema } from "../utils/validation.js";
+import { OAuth2Client } from "google-auth-library";
 
 const sanitizeUser = (user) => ({
   id: user.id,
@@ -94,4 +95,55 @@ export const me = async (req, res) => {
     console.error("AUTH ME ERROR DETAILS:", err); 
     res.status(500).json({ message: err.message || "Something went wrong" });
   }
+};
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// POST /api/auth/google
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: "Missing Google credential" });
+    }
+
+    // Verify the ID token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (!payload.email_verified) {
+  return res.status(401).json({ message: "Google email not verified" });
+}
+    const { email, name, picture, sub } = payload;
+
+    // Check if user exists
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      // Create a new user if they don't exist
+      // Generate a random password (they'll use Google to log in)
+      const randomPassword = Math.random().toString(36).slice(-16);
+      const hashed = await bcrypt.hash(randomPassword, 10);
+
+      user = await prisma.user.create({
+        data: {
+          name: name || email.split("@")[0],
+          email,
+          password: hashed,
+          // Optional: save the Google profile picture as avatarUrl
+          // avatarUrl: picture, 
+        },
+      });
+    }
+
+    // Issue your app's JWT (same as regular login)
+    const token = signToken({ id: user.id, email: user.email });
+
+    res.json({ user: sanitizeUser(user), token });
+  } catch (err) {
+  console.error("Google auth error:", err.message, err);
+  res.status(401).json({ message: `Invalid Google token: ${err.message}` });
+}
 };
