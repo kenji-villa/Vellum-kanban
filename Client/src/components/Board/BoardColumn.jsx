@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ConfirmDialog from "../UI/ConfirmDialog";
 import { useToast } from "../../context/ToastContext";
 import { useDroppable } from "@dnd-kit/core";
+import ListIcon from "./ListIcon";
+import { getListMeta } from "../../utils/listStyle";
+
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -13,7 +16,7 @@ import TaskCard from "../Card/TaskCard";
 import TaskModal from "../Card/TaskModal";
 import { useBoard } from "../../context/BoardContext";
 
-const BoardColumn = ({ boardId, list, variant = "todo" }) => {
+const BoardColumn = ({ boardId, list, index = 0 }) => {
   const { updateCard, deleteCard, createCard, updateList, deleteList } =
     useBoard();
   const [modalOpen, setModalOpen] = useState(false);
@@ -23,6 +26,18 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
   const [newTitle, setNewTitle] = useState(list.title);
   const toast = useToast();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const meta = getListMeta(list.title, index);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!listMenuOpen) return;
+    const onDown = (e) => {
+      if (!menuRef.current?.contains(e.target)) setListMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [listMenuOpen]);
 
   // --- Column Sortable (for reordering columns) ---
   const {
@@ -48,12 +63,6 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
     transition: colTransition,
     opacity: isColumnDragging ? 0.5 : 1,
   };
-
-  const actionIcon = {
-    todo: "+",
-    inprogress: "…",
-    done: "✓",
-  }[variant];
 
   // --- Card Handlers ---
   const handleOpenCreate = () => {
@@ -129,11 +138,15 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
         className="flex-1 min-w-[280px] max-w-[320px] flex flex-col"
       >
         {/* Column Header — Drag Handle */}
+        {/* Column Header — Drag Handle */}
         <div
           {...colAttributes}
           {...colListeners}
-          className="bg-[#1e2757] text-white rounded-t-xl px-4 py-3 flex items-center justify-between relative cursor-grab active:cursor-grabbing"
+          style={{ borderTopColor: meta.color }}
+          className="bg-[#1e2757] text-white rounded-t-xl border-t-4 px-4 py-3 flex items-center gap-2 relative cursor-grab active:cursor-grabbing"
         >
+          <ListIcon kind={meta.kind} color={meta.color} />
+
           {renaming ? (
             <input
               type="text"
@@ -142,46 +155,59 @@ const BoardColumn = ({ boardId, list, variant = "todo" }) => {
               onBlur={handleRenameList}
               onKeyDown={(e) => e.key === "Enter" && handleRenameList()}
               autoFocus
-              onPointerDown={(e) => e.stopPropagation()} // don't start drag while typing
-              className="bg-transparent text-white font-semibold text-sm outline-none border-b border-white/40 w-full"
+              onPointerDown={(e) => e.stopPropagation()}
+              className="bg-transparent text-white font-semibold text-sm outline-none border-b border-white/40 flex-1 min-w-0"
             />
           ) : (
-            <h2 className="font-semibold text-sm tracking-wide">
+            <h2 className="font-semibold text-sm tracking-wide truncate">
               {list.title}
             </h2>
           )}
 
-          <button
-            onPointerDown={(e) => e.stopPropagation()} // don't start drag from the button
-            onClick={
-              variant === "todo"
-                ? handleOpenCreate
-                : () => setListMenuOpen((v) => !v)
-            }
-            className="text-white/70 hover:text-white text-lg leading-none ml-2"
-          >
-            {variant === "todo" ? "+" : actionIcon}
-          </button>
+          <span className="text-[11px] font-medium bg-white/10 text-white/80 px-2 py-0.5 rounded-full">
+            {list.cards.length}
+          </span>
 
-          {listMenuOpen && (
-            <div className="absolute top-full right-2 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-1 w-36 z-20">
-              <button
-                onClick={() => {
-                  setRenaming(true);
-                  setListMenuOpen(false);
-                }}
-                className="block w-full text-left text-sm text-gray-700 px-3 py-1.5 hover:bg-gray-100"
-              >
-                Rename
-              </button>
-              <button
-                onClick={handleDeleteList}
-                className="block w-full text-left text-sm text-red-600 px-3 py-1.5 hover:bg-red-50"
-              >
-                Delete
-              </button>
-            </div>
-          )}
+          <div
+            ref={menuRef}
+            className="ml-auto relative flex items-center gap-1"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={handleOpenCreate}
+              title="Add task"
+              className="w-7 h-7 rounded-lg text-white/70 hover:text-white hover:bg-white/10 text-lg leading-none"
+            >
+              +
+            </button>
+            <button
+              onClick={() => setListMenuOpen((v) => !v)}
+              title="List options"
+              className="w-7 h-7 rounded-lg text-white/70 hover:text-white hover:bg-white/10 text-lg leading-none"
+            >
+              ⋯
+            </button>
+
+            {listMenuOpen && (
+              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-100 dark:border-slate-700 py-1 w-36 z-20">
+                <button
+                  onClick={() => {
+                    setRenaming(true);
+                    setListMenuOpen(false);
+                  }}
+                  className="block w-full text-left text-sm text-gray-700 dark:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-700"
+                >
+                  Rename
+                </button>
+                <button
+                  onClick={handleDeleteList}
+                  className="block w-full text-left text-sm text-red-600 px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/30"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Cards Droppable Area */}

@@ -18,12 +18,6 @@ import FilterBar from "./FilterBar";
 import { useBoard } from "../../context/BoardContext";
 import { filterBoard, emptyFilters } from "../../utils/filters";
 
-const variantForIndex = (index) => {
-  if (index === 0) return "todo";
-  if (index === 1) return "inprogress";
-  return "done";
-};
-
 const Board = ({ board }) => {
   const { createList, reorderLists, moveCard } = useBoard();
   const [addingList, setAddingList] = useState(false);
@@ -216,7 +210,7 @@ const Board = ({ board }) => {
                 key={list.id}
                 boardId={board.id}
                 list={list}
-                variant={variantForIndex(idx)}
+                index={idx}
               />
             ))}
           </SortableContext>
