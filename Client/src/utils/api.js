@@ -61,6 +61,9 @@ export const api = {
     request("/auth/login", { method: "POST", body: payload, auth: false }),
   me: () => request("/auth/me"),
 
+  googleLogin: (credential) =>
+  request("/auth/google", { method: "POST", body: { credential }, auth: false }),
+
   // --- Boards ---
   listBoards: () => request("/boards"),
   getBoard: (id) => request(`/boards/${id}`),
