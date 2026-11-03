@@ -94,6 +94,24 @@ export const api = {
   moveCard: (id, payload) =>
     request(`/cards/${id}/move`, { method: "PATCH", body: payload }),
 
+    // --- Team ---
+  searchUsers: (q) => request(`/users/search?q=${encodeURIComponent(q)}`),
+  getUserProfile: (id) => request(`/users/${id}/profile`),
+  getTeam: () => request("/team"),
+  sendInvitation: (receiverId, message) =>
+    request("/team/invitations", { method: "POST", body: { receiverId, message } }),
+  acceptInvitation: (id) =>
+    request(`/team/invitations/${id}/accept`, { method: "POST" }),
+  declineInvitation: (id) =>
+    request(`/team/invitations/${id}/decline`, { method: "POST" }),
+  cancelInvitation: (id) => request(`/team/invitations/${id}`, { method: "DELETE" }),
+  removeTeammate: (userId) => request(`/team/members/${userId}`, { method: "DELETE" }),
+
+  // --- Notifications ---
+  getNotifications: () => request("/notifications"),
+  markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: "POST" }),
+  markAllNotificationsRead: () => request("/notifications/read-all", { method: "POST" }),
+
   //Profile------------------------
 
   updateProfile: (payload) => request("/users/me", { method: "PATCH", body: payload }),
