@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useBoard } from "../../context/BoardContext";
 import { useToast } from "../../context/ToastContext";
 import ConfirmDialog from "../UI/ConfirmDialog";
+import { getListMeta } from "../../utils/listStyle";
 
 const BoardCard = ({ board }) => {
   const navigate = useNavigate();
@@ -64,12 +65,35 @@ const BoardCard = ({ board }) => {
 
   const totalCards = board.lists.reduce((acc, l) => acc + l.cards.length, 0);
 
+  const doneCards = board.lists.reduce(
+    (acc, l) =>
+      acc + (getListMeta(l.title).kind === "done" ? l.cards.length : 0),
+    0,
+  );
+  const progress = totalCards ? Math.round((doneCards / totalCards) * 100) : 0;
+
+  const COVERS = [
+    "linear-gradient(90deg,#38bdf8,#6366f1)",
+    "linear-gradient(90deg,#f472b6,#f97316)",
+    "linear-gradient(90deg,#34d399,#0ea5e9)",
+    "linear-gradient(90deg,#a78bfa,#ec4899)",
+    "linear-gradient(90deg,#fbbf24,#f43f5e)",
+  ];
+  const cover =
+    COVERS[
+      [...board.id].reduce((a, ch) => a + ch.charCodeAt(0), 0) % COVERS.length
+    ];
+
   return (
     <>
       <div
         onClick={handleCardClick}
-        className="relative bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-slate-700 cursor-pointer group"
+        className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm card-lift border border-gray-100 dark:border-slate-700 cursor-pointer group"
       >
+        <div
+          className="absolute inset-x-0 top-0 h-1.5"
+          style={{ background: cover }}
+        />
         {/* Top Row: Title / Rename Input + Menu */}
         <div className="flex items-start justify-between gap-2 mb-1">
           {renaming ? (
@@ -139,9 +163,24 @@ const BoardCard = ({ board }) => {
         </div>
 
         {/* Stats */}
+
         <p className="text-xs text-gray-500 dark:text-gray-400">
           {board.lists.length} lists · {totalCards} cards
         </p>
+        {totalCards > 0 && (
+          <div className="mt-3">
+            <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+              <span>Progress</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-gray-100 dark:bg-slate-700 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${progress}%`, background: cover }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Confirm Delete */}

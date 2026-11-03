@@ -1,3 +1,81 @@
+/* --- App visuals --- */
+.app-bg {
+  background-color: #f4f4f4;
+  background-image:
+    radial-gradient(
+      60rem 30rem at 85% -10%,
+      var(--accent-soft),
+      transparent 60%
+    ),
+    radial-gradient(
+      40rem 25rem at -10% 110%,
+      rgba(30, 39, 87, 0.08),
+      transparent 60%
+    );
+  background-attachment: fixed;
+}
+.dark .app-bg {
+  background-color: #0f172a;
+  background-image:
+    radial-gradient(
+      60rem 30rem at 85% -10%,
+      var(--accent-soft),
+      transparent 60%
+    ),
+    radial-gradient(
+      40rem 25rem at -10% 110%,
+      rgba(99, 102, 241, 0.14),
+      transparent 60%
+    );
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.card-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -12px rgba(30, 39, 87, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-float {
+    animation: none;
+  }
+  .card-lift:hover {
+    transform: none;
+  }
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -167,7 +245,7 @@
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: -4.5px;
     border: 5px solid transparent;

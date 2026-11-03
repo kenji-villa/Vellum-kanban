@@ -114,7 +114,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f4f4f4] dark:bg-[#0f172a]">
+    <div className="flex min-h-screen app-bg">
       <Sidebar />
 
       <div className="flex-1 flex flex-col p-8 overflow-y-auto">
