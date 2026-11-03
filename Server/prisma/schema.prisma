@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -18,8 +24,46 @@ model User {
   title     String?
   avatarUrl String?
   boards    Board[]
+  invitesSent        Invitation[]   @relation("InvitesSent")
+  invitesReceived    Invitation[]   @relation("InvitesReceived")
+  notifications      Notification[] @relation("NotificationOwner")
+  notificationsActed Notification[] @relation("NotificationActor")
 
   @@map("users")
+}
+
+model Invitation {
+  id            String           @id @default(cuid())
+  senderId      String
+  receiverId    String
+  status        InvitationStatus @default(PENDING)
+  message       String?
+  createdAt     DateTime         @default(now())
+  respondedAt   DateTime?
+  sender        User             @relation("InvitesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver      User             @relation("InvitesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+  @@map("invitations")
+}
+
+
+model Notification {
+  id           String      @id @default(cuid())
+  userId       String
+  type         String
+  actorId      String?
+  invitationId String?
+  readAt       DateTime?
+  createdAt    DateTime    @default(now())
+  user         User        @relation("NotificationOwner", fields: [userId], references: [id], onDelete: Cascade)
+  actor        User?       @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  invitation   Invitation? @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
 }
 
 model Board {
