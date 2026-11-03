@@ -11,6 +11,8 @@ import listRoutes from "./routes/listRoutes.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
+import teamRoutes from "./routes/teamRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -32,6 +34,9 @@ app.use("/api/users", requireAuth, userRoutes);
 app.use("/api/boards", requireAuth, boardRoutes);
 app.use("/api/lists", requireAuth, listRoutes);
 app.use("/api/cards", requireAuth, cardRoutes);
+
+app.use("/api/team", requireAuth, teamRoutes);
+app.use("/api/notifications", requireAuth, notificationRoutes);
 
 app.use((req, res) => res.status(404).json({ message: "Route not found" }));
 app.use((err, req, res, next) => {
