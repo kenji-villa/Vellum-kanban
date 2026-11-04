@@ -99,10 +99,42 @@ const ProfileCard = ({ userId, onChanged }) => {
         </p>
         <p className="text-[11px] text-gray-400 mt-1">Member since {since}</p>
 
+        {(user.city || user.country) && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            📍 {[user.city, user.country].filter(Boolean).join(", ")}
+            {user.department ? ` · ${user.department}` : ""}
+          </p>
+        )}
+
         {user.bio && (
           <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mt-4 whitespace-pre-line">
             {user.bio}
           </p>
+        )}
+
+        {user.skills?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-4">
+            {user.skills.map((s) => (
+              <span
+                key={s}
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--accent-soft)] text-[var(--accent)]"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
+        {user.languages?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {user.languages.map((l) => (
+              <span
+                key={l}
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-300"
+              >
+                {l}
+              </span>
+            ))}
+          </div>
         )}
 
         <div className="mt-5 pt-4 border-t border-gray-100 dark:border-slate-700">
