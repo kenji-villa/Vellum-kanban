@@ -1,6 +1,5 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import NotificationBell from "./UI/NotificationBell";
 import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
@@ -41,9 +40,6 @@ const Header = () => {
             Team
           </NavLink>
         </nav>
-
-        {/* Notifications */}
-        <NotificationBell />
 
         {/* User avatar — navigates to profile page */}
         <button
