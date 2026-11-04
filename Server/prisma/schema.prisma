@@ -24,6 +24,13 @@ model User {
   title     String?
   avatarUrl String?
   boards    Board[]
+  department String?
+  phone      String?
+  country    String?
+  city       String?
+  languages  String[] @default([])
+  skills     String[] @default([])
+  links      Json?
   invitesSent        Invitation[]   @relation("InvitesSent")
   invitesReceived    Invitation[]   @relation("InvitesReceived")
   notifications      Notification[] @relation("NotificationOwner")
