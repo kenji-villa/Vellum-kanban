@@ -119,9 +119,9 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-20 z-40 bg-[#1e2757] flex flex-col items-center py-6 min-h-screen h-screen sticky top-0 justify-between shrink-0">
+    <aside className="w-20 bg-[#1e2757] flex flex-col items-center py-6 [@media(max-height:720px)]:py-3 min-h-screen h-screen sticky top-0 z-40 justify-between shrink-0">
       {/* Top Icons */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 [@media(max-height:720px)]:gap-2">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
@@ -148,7 +148,7 @@ const Sidebar = () => {
       </div>
 
       {/* Bottom Icons */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 [@media(max-height:720px)]:gap-2">
         <NotificationBell />
         <button
           onClick={() =>
