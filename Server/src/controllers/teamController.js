@@ -96,7 +96,18 @@ export const searchUsers = wrap(async (req, res) => {
 export const getPublicProfile = wrap(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.params.id },
-    select: { ...PUBLIC_USER, bio: true, bannerUrl: true, createdAt: true },
+    select: {
+  ...PUBLIC_USER,
+  bio: true,
+  bannerUrl: true,
+  createdAt: true,
+  department: true,
+  country: true,
+  city: true,
+  languages: true,
+  skills: true,
+  links: true,
+},
   });
   if (!user) return res.status(404).json({ message: "User not found" });
 
