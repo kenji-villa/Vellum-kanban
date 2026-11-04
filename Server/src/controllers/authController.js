@@ -3,17 +3,8 @@ import prisma from "../prisma.js";
 import { signToken } from "../utils/jwt.js";
 import { signupSchema, loginSchema } from "../utils/validation.js";
 import { OAuth2Client } from "google-auth-library";
+import { sanitizeUser } from "../utils/sanitizeUser.js";
 
-const sanitizeUser = (user) => ({
-  id: user.id,
-  name: user.name,
-  email: user.email,
-  title: user.title,       
-  bio: user.bio,           
-  bannerUrl: user.bannerUrl,
-  avatarUrl: user.avatarUrl, 
-  createdAt: user.createdAt
-});
 
 // POST /api/auth/signup
 export const signup = async (req, res) => {
