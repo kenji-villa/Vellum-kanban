@@ -1,0 +1,17 @@
+export const sanitizeUser = (user) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  title: user.title,
+  bio: user.bio,
+  bannerUrl: user.bannerUrl,
+  avatarUrl: user.avatarUrl,
+  department: user.department,
+  phone: user.phone,
+  country: user.country,
+  city: user.city,
+  languages: user.languages ?? [],
+  skills: user.skills ?? [],
+  links: user.links ?? {},
+  createdAt: user.createdAt,
+});
