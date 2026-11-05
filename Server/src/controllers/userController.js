@@ -19,7 +19,7 @@ const cleanTags = (arr, { maxItems = 12, maxLen = 30 } = {}) => {
   return out;
 };
 
-const LINK_KEYS = ["website", "linkedin", "github", "twitter"];
+const LINK_KEYS = ["website", "linkedin", "github", "instagram"];
 const cleanLinks = (obj) => {
   if (!obj || typeof obj !== "object") return undefined;
   const out = {};
