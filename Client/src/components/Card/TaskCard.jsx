@@ -1,6 +1,7 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import PersonAvatar from "../Team/PersonAvatar";
 
 const priorityDot = {
   high: "bg-red-500",
@@ -19,7 +20,8 @@ const labelColors = {
   Marketing: "bg-yellow-100 text-yellow-700",
 };
 
-const TaskCard = ({ card, onClick }) => {
+const TaskCard = ({ card, onClick, people = [] }) => {
+  const person = people.find((p) => p.id === card.assigneeId);
   const {
     attributes,
     listeners,
@@ -59,10 +61,16 @@ const TaskCard = ({ card, onClick }) => {
             {card.priority}
           </span>
         </div>
-        {card.assignee && (
-          <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-[10px] font-bold text-gray-700">
-            {card.assignee.charAt(0)}
-          </div>
+        {(card.assigneeId || card.assignee) && (
+          <span title={person?.name || card.assignee}>
+            {person ? (
+              <PersonAvatar user={person} size={24} />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-[10px] font-bold text-gray-700">
+                {(card.assignee || "?").charAt(0)}
+              </div>
+            )}
+          </span>
         )}
       </div>
 

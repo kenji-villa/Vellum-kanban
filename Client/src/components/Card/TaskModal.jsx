@@ -2,7 +2,14 @@ import React from "react";
 import Modal from "../UI/Modal";
 import TaskForm from "./TaskForm";
 
-const TaskModal = ({ isOpen, onClose, card, onSubmit, onDelete }) => {
+const TaskModal = ({
+  isOpen,
+  onClose,
+  card,
+  onSubmit,
+  onDelete,
+  people = [],
+}) => {
   return (
     <Modal
       isOpen={isOpen}
@@ -19,7 +26,12 @@ const TaskModal = ({ isOpen, onClose, card, onSubmit, onDelete }) => {
         ) : null
       }
     >
-      <TaskForm initialValues={card} onSubmit={onSubmit} onCancel={onClose} />
+      <TaskForm
+        initialValues={card}
+        onSubmit={onSubmit}
+        onCancel={onClose}
+        people={people}
+      />
     </Modal>
   );
 };
