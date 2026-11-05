@@ -19,9 +19,11 @@ export const listNotifications = wrap(async (req, res) => {
       orderBy: { createdAt: "desc" },
       take: 30,
       include: {
-        actor: { select: ACTOR },
-        invitation: { select: { id: true, status: true, message: true } },
-      },
+  actor: { select: ACTOR },
+  invitation: { select: { id: true, status: true, message: true } },
+  board: { select: { id: true, title: true } },
+  card: { select: { id: true, title: true } },
+},
     }),
     prisma.notification.count({ where: { userId: req.user.id, readAt: null } }),
   ]);
