@@ -49,10 +49,10 @@ export const SKILL_SUGGESTIONS = [
 ];
 
 export const LINK_META = {
-  website: { label: "Website", badge: "🌐", placeholder: "yourwebsite.com", base: "https://" },
-  linkedin: { label: "LinkedIn", badge: "in", placeholder: "linkedin.com/in/you or username", base: "https://linkedin.com/in/" },
-  github: { label: "GitHub", badge: "GH", placeholder: "username", base: "https://github.com/" },
-  twitter: { label: "X / Twitter", badge: "X", placeholder: "@username", base: "https://x.com/" },
+  website: { label: "Website", placeholder: "yourwebsite.com", base: "https://" },
+  linkedin: { label: "LinkedIn", placeholder: "linkedin.com/in/you or username", base: "https://linkedin.com/in/" },
+  github: { label: "GitHub", placeholder: "username", base: "https://github.com/" },
+  instagram: { label: "Instagram", placeholder: "@username", base: "https://instagram.com/" },
 };
 
 // Builds a safe href, or null. Blocks javascript:, data: and other schemes.
