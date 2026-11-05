@@ -7,6 +7,9 @@ import TagInput from "../components/Profile/TagInput";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../utils/api";
+import { FiArrowUpRight } from "react-icons/fi";
+import LinkIcon from "../components/Profile/LinkIcon";
+
 import {
   COUNTRIES,
   LANGUAGE_SUGGESTIONS,
@@ -134,7 +137,7 @@ const toForm = (u) => ({
     website: "",
     linkedin: "",
     github: "",
-    twitter: "",
+    instagram: "",
     ...(u?.links || {}),
   },
 });
@@ -184,7 +187,9 @@ const ProfilePage = () => {
 
   const strength = profileStrength(user);
   const location = [user?.city, user?.country].filter(Boolean).join(", ");
-  const links = Object.entries(user?.links || {}).filter(([, v]) => v);
+  const links = Object.entries(user?.links || {}).filter(
+    ([k, v]) => v && LINK_META[k],
+  );
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-US", {
         month: "long",
@@ -320,34 +325,41 @@ const ProfilePage = () => {
                       </button>
                     </p>
                   ) : (
-                    <ul className="space-y-3">
+                    <ul className="space-y-1">
                       {links.map(([key, value]) => {
                         const href = linkHref(key, value);
-                        const text = linkLabel(value);
-                        return (
-                          <li key={key} className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 text-[11px] font-bold text-gray-500 dark:text-gray-300 flex items-center justify-center shrink-0">
-                              {LINK_META[key].badge}
-                            </span>
-                            <div className="min-w-0">
+                        const cls =
+                          "group flex items-center gap-3 p-2 -mx-2 rounded-xl transition-colors";
+                        const inner = (
+                          <>
+                            <LinkIcon type={key} />
+                            <div className="min-w-0 flex-1">
                               <p className="text-[11px] text-gray-400">
                                 {LINK_META[key].label}
                               </p>
-                              {href ? (
-                                <a
-                                  href={href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-gray-800 dark:text-gray-100 hover:text-[var(--accent)] truncate block"
-                                >
-                                  {text}
-                                </a>
-                              ) : (
-                                <p className="text-sm text-gray-800 dark:text-gray-100 truncate">
-                                  {text}
-                                </p>
-                              )}
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
+                                {linkLabel(value)}
+                              </p>
                             </div>
+                            {href && (
+                              <FiArrowUpRight className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 group-hover:text-[var(--accent)] transition-opacity" />
+                            )}
+                          </>
+                        );
+                        return (
+                          <li key={key}>
+                            {href ? (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`${cls} hover:bg-gray-50 dark:hover:bg-slate-700/50`}
+                              >
+                                {inner}
+                              </a>
+                            ) : (
+                              <div className={cls}>{inner}</div>
+                            )}
                           </li>
                         );
                       })}
@@ -552,15 +564,17 @@ const ProfilePage = () => {
                 <Card title="On the web">
                   <div className="space-y-3">
                     {Object.entries(LINK_META).map(([key, meta]) => (
-                      <Field key={key} label={meta.label}>
+                      <div key={key} className="flex items-center gap-3">
+                        <LinkIcon type={key} size={40} />
                         <input
                           type="text"
                           value={form.links[key] || ""}
                           onChange={(e) => setLink(key, e.target.value)}
-                          placeholder={meta.placeholder}
+                          placeholder={`${meta.label}: ${meta.placeholder}`}
+                          aria-label={meta.label}
                           className={inputCls}
                         />
-                      </Field>
+                      </div>
                     ))}
                   </div>
                 </Card>
