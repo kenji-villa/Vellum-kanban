@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import Board from "../components/Board/Board";
 import { useBoard } from "../context/BoardContext";
+import BoardBar from "../components/Board/BoardBar";
 
 const BoardPage = () => {
   const { boardId } = useParams();
@@ -30,6 +31,8 @@ const BoardPage = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
+        <BoardBar board={activeBoard} />
+        <Board board={activeBoard} />
         <Board board={activeBoard} />
       </div>
     </div>
