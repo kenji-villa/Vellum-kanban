@@ -10,7 +10,7 @@ const AVAILABLE_LABELS = [
   "Marketing",
 ];
 
-const TaskForm = ({ initialValues, onSubmit, onCancel }) => {
+const TaskForm = ({ initialValues, onSubmit, onCancel, people = [] }) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -18,6 +18,7 @@ const TaskForm = ({ initialValues, onSubmit, onCancel }) => {
     dueDate: "",
     labels: [],
     assignee: "",
+    assigneeId: "",
   });
 
   useEffect(() => {
@@ -29,6 +30,7 @@ const TaskForm = ({ initialValues, onSubmit, onCancel }) => {
         dueDate: initialValues.dueDate || "",
         labels: initialValues.labels || [],
         assignee: initialValues.assignee || "",
+        assigneeId: initialValues.assigneeId || "",
       });
     }
   }, [initialValues]);
@@ -117,13 +119,25 @@ const TaskForm = ({ initialValues, onSubmit, onCancel }) => {
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Assignee
         </label>
-        <input
-          type="text"
-          value={form.assignee}
-          onChange={(e) => handleChange("assignee", e.target.value)}
-          placeholder="Sarah Chen"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-        />
+        <select
+          value={form.assigneeId}
+          onChange={(e) => {
+            const p = people.find((x) => x.id === e.target.value);
+            setForm((prev) => ({
+              ...prev,
+              assigneeId: e.target.value,
+              assignee: p ? p.name : "",
+            }));
+          }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+        >
+          <option value="">Unassigned</option>
+          {people.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Labels */}
