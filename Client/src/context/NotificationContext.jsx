@@ -20,6 +20,13 @@ const POLL_MS = 45000;
 const WARN_DAYS_HIGH = 3; // high-priority tasks warn this many days ahead
 const WARN_DAYS_NORMAL = 1; // everything else
 
+const KINDS = {
+  INVITE_RECEIVED: "invite",
+  INVITE_ACCEPTED: "accepted",
+  BOARD_SHARED: "shared",
+  TASK_ASSIGNED: "assigned",
+};
+
 const loadSeen = () => {
   try {
     return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]"));
@@ -35,7 +42,7 @@ const saveSeen = (set) => {
   }
 };
 
-const buildDeadlineItems = (boards) => {
+const buildDeadlineItems = (boards, meId) => {
   const today = startOfDay(new Date());
   const out = [];
   for (const b of boards) {
@@ -43,6 +50,9 @@ const buildDeadlineItems = (boards) => {
       if (getListMeta(l.title).kind === "done") continue;
       for (const c of l.cards) {
         if (!c.dueDate) continue;
+        // Only tasks that are yours: assigned to you, or unassigned on a board you own
+        const mine = c.assigneeId ? c.assigneeId === meId : b.role !== "member";
+        if (!mine) continue;
         const days = differenceInCalendarDays(new Date(c.dueDate), today);
         const limit = c.priority === "high" ? WARN_DAYS_HIGH : WARN_DAYS_NORMAL;
         if (days > limit) continue;
@@ -63,8 +73,8 @@ const buildDeadlineItems = (boards) => {
 };
 
 export const NotificationProvider = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  const { state } = useBoard();
+  const { isAuthenticated, user } = useAuth();
+  const { state, refreshBoards } = useBoard();
 
   const [server, setServer] = useState({ notifications: [], unreadCount: 0 });
   const [seen, setSeen] = useState(loadSeen);
@@ -80,13 +90,17 @@ export const NotificationProvider = ({ children }) => {
       const data = await api.getNotifications();
       setServer(data);
       const top = data.notifications[0]?.id || "";
-      // A new notification may mean the team changed (e.g. someone accepted)
-      if (lastTopId.current !== null && top !== lastTopId.current) bumpTeam();
+      // A new notification may mean something changed (a teammate accepted,
+      // a board was shared with you, a task was assigned to you)
+      if (lastTopId.current !== null && top !== lastTopId.current) {
+        bumpTeam();
+        refreshBoards();
+      }
       lastTopId.current = top;
     } catch {
       /* ignore polling errors */
     }
-  }, [isAuthenticated, bumpTeam]);
+  }, [isAuthenticated, bumpTeam, refreshBoards]);
 
   // Poll + refresh when the tab regains focus
   useEffect(() => {
@@ -112,9 +126,10 @@ export const NotificationProvider = ({ children }) => {
     return () => clearInterval(id);
   }, []);
 
+  // `tick` is only here to force a recompute when the clock moves on
   const deadlines = useMemo(
-    () => buildDeadlineItems(state.boards),
-    [state.boards, tick],
+    () => buildDeadlineItems(state.boards, user?.id),
+    [state.boards, tick, user?.id],
   );
 
   // Forget "seen" keys for alerts that no longer exist
@@ -133,11 +148,13 @@ export const NotificationProvider = ({ children }) => {
     const serverItems = server.notifications.map((n) => ({
       key: `n:${n.id}`,
       id: n.id,
-      kind: n.type === "INVITE_RECEIVED" ? "invite" : "accepted",
+      kind: KINDS[n.type] || "accepted",
       unread: !n.readAt,
       createdAt: n.createdAt,
       actor: n.actor,
       invitation: n.invitation,
+      board: n.board,
+      card: n.card,
     }));
     const pending = serverItems.filter(
       (i) => i.kind === "invite" && i.invitation?.status === "PENDING",
