@@ -7,7 +7,7 @@ import PersonAvatar from "../Team/PersonAvatar";
 
 const TABS = [
   { id: "all", label: "All" },
-  { id: "invites", label: "Invitations" },
+  { id: "invites", label: "Team" },
   { id: "deadlines", label: "Deadlines" },
 ];
 
@@ -163,6 +163,39 @@ const AcceptedItem = ({ item, onOpen }) => (
   </li>
 );
 
+const ActivityItem = ({ item, onOpen }) => {
+  const shared = item.kind === "shared";
+  return (
+    <li>
+      <button
+        onClick={() => onOpen(item)}
+        className="relative w-full text-left flex gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+      >
+        {item.unread && <UnreadDot />}
+        <PersonAvatar user={item.actor} size={40} />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-gray-700 dark:text-gray-200 leading-snug">
+            <span className="font-semibold">{item.actor?.name}</span>{" "}
+            {shared ? "shared the board " : "assigned you "}
+            <span className="font-semibold">
+              {shared ? item.board?.title : item.card?.title}
+            </span>
+            {shared ? " with you" : ""}
+          </p>
+          {!shared && item.board && (
+            <p className="text-[11px] text-gray-400 truncate">
+              {item.board.title}
+            </p>
+          )}
+          <p className="text-[11px] text-gray-400 mt-0.5">
+            {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+          </p>
+        </div>
+      </button>
+    </li>
+  );
+};
+
 const NotificationBell = () => {
   const navigate = useNavigate();
   const toast = useToast();
@@ -203,7 +236,10 @@ const NotificationBell = () => {
   const handleOpen = (item) => {
     markRead(item);
     setOpen(false);
-    navigate(item.kind === "deadline" ? `/board/${item.boardId}` : "/team");
+    if (item.kind === "deadline") navigate(`/board/${item.boardId}`);
+    else if ((item.kind === "shared" || item.kind === "assigned") && item.board)
+      navigate(`/board/${item.board.id}`);
+    else navigate("/team");
   };
 
   const handleRespond = async (item, accept) => {
@@ -314,7 +350,8 @@ const NotificationBell = () => {
                   You're all caught up
                 </p>
                 <p className="text-[11px] text-gray-400 mt-1">
-                  Invitations and deadline alerts will show up here.
+                  Invitations, assignments and deadline alerts will show up
+                  here.
                 </p>
               </div>
             ) : (
@@ -332,6 +369,12 @@ const NotificationBell = () => {
                       item={item}
                       onRespond={handleRespond}
                       busy={busyKey === item.key}
+                    />
+                  ) : item.kind === "shared" || item.kind === "assigned" ? (
+                    <ActivityItem
+                      key={item.key}
+                      item={item}
+                      onOpen={handleOpen}
                     />
                   ) : (
                     <AcceptedItem
