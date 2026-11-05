@@ -73,6 +73,13 @@ export const api = {
     request(`/boards/${id}`, { method: "PATCH", body: payload }),
   deleteBoard: (id) => request(`/boards/${id}`, { method: "DELETE" }),
 
+    // --- Board sharing ---
+  getBoardMembers: (boardId) => request(`/boards/${boardId}/members`),
+  addBoardMember: (boardId, userId) =>
+    request(`/boards/${boardId}/members`, { method: "POST", body: { userId } }),
+  removeBoardMember: (boardId, userId) =>
+    request(`/boards/${boardId}/members/${userId}`, { method: "DELETE" }),
+
   // --- Lists ---
   createList: (boardId, payload) =>
     request(`/boards/${boardId}/lists`, { method: "POST", body: payload }),
