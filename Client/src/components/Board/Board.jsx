@@ -19,7 +19,7 @@ import { useBoard } from "../../context/BoardContext";
 import { filterBoard, emptyFilters } from "../../utils/filters";
 
 const Board = ({ board }) => {
-  const { createList, reorderLists, moveCard } = useBoard();
+  const { createList, reorderLists, moveCard, pauseSync } = useBoard();
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
   const [activeItem, setActiveItem] = useState(null);
@@ -51,6 +51,7 @@ const Board = ({ board }) => {
     board.lists.find((l) => l.cards.some((c) => c.id === cardId));
 
   const handleDragStart = (event) => {
+    pauseSync(true);
     const { active } = event;
     const type = active.data.current?.type;
 
@@ -70,6 +71,7 @@ const Board = ({ board }) => {
     const { active, over } = event;
     const currentActive = activeItem;
     setActiveItem(null);
+    setTimeout(() => pauseSync(false), 1500);
 
     if (!over) return;
 
@@ -199,6 +201,10 @@ const Board = ({ board }) => {
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragCancel={() => {
+          setActiveItem(null);
+          pauseSync(false);
+        }}
       >
         <div className="flex gap-4 flex-1 overflow-x-auto pb-4 items-start">
           <SortableContext
