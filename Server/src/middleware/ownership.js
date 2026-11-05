@@ -1,55 +1,68 @@
 import prisma from "../prisma.js";
 
-/**
- * Loads a board by :id and attaches it to req.board.
- * Only succeeds if req.user owns it.
- */
-export const requireBoardOwner = async (req, res, next) => {
+// Returns { board, role } where role is "owner", "member" or null
+export const roleOnBoard = async (boardId, userId) => {
+  const board = await prisma.board.findUnique({
+    where: { id: boardId },
+    select: {
+      id: true,
+      userId: true,
+      members: { where: { userId }, select: { id: true } },
+    },
+  });
+  if (!board) return { board: null, role: null };
+  if (board.userId === userId) return { board, role: "owner" };
+  return { board, role: board.members.length ? "member" : null };
+};
+
+const guardBoard = (ownerOnly) => async (req, res, next) => {
   try {
     const boardId = req.params.id || req.params.boardId;
-    const board = await prisma.board.findUnique({ where: { id: boardId } });
+    const { board, role } = await roleOnBoard(boardId, req.user.id);
     if (!board) return res.status(404).json({ message: "Board not found" });
-    if (board.userId !== req.user.id)
+    if (!role || (ownerOnly && role !== "owner")) {
       return res.status(403).json({ message: "Forbidden" });
+    }
     req.board = board;
+    req.boardRole = role;
     next();
   } catch (err) {
     next(err);
   }
 };
 
-/**
- * Loads a list by :id, checks it belongs to a board owned by req.user.
- */
-export const requireListOwner = async (req, res, next) => {
+// Owner or member
+export const requireBoardAccess = guardBoard(false);
+// Owner only
+export const requireBoardOwner = guardBoard(true);
+
+export const requireListAccess = async (req, res, next) => {
   try {
-    const list = await prisma.list.findUnique({
-      where: { id: req.params.id },
-      include: { board: true },
-    });
+    const list = await prisma.list.findUnique({ where: { id: req.params.id } });
     if (!list) return res.status(404).json({ message: "List not found" });
-    if (list.board.userId !== req.user.id)
-      return res.status(403).json({ message: "Forbidden" });
+    const { role } = await roleOnBoard(list.boardId, req.user.id);
+    if (!role) return res.status(403).json({ message: "Forbidden" });
     req.list = list;
+    req.boardId = list.boardId;
+    req.boardRole = role;
     next();
   } catch (err) {
     next(err);
   }
 };
 
-/**
- * Loads a card by :id, checks it belongs to a list -> board owned by req.user.
- */
-export const requireCardOwner = async (req, res, next) => {
+export const requireCardAccess = async (req, res, next) => {
   try {
     const card = await prisma.card.findUnique({
       where: { id: req.params.id },
-      include: { list: { include: { board: true } } },
+      include: { list: true },
     });
     if (!card) return res.status(404).json({ message: "Card not found" });
-    if (card.list.board.userId !== req.user.id)
-      return res.status(403).json({ message: "Forbidden" });
+    const { role } = await roleOnBoard(card.list.boardId, req.user.id);
+    if (!role) return res.status(403).json({ message: "Forbidden" });
     req.card = card;
+    req.boardId = card.list.boardId;
+    req.boardRole = role;
     next();
   } catch (err) {
     next(err);
