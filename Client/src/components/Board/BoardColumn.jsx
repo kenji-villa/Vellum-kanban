@@ -4,6 +4,7 @@ import { useToast } from "../../context/ToastContext";
 import { useDroppable } from "@dnd-kit/core";
 import ListIcon from "./ListIcon";
 import { getListMeta } from "../../utils/listStyle";
+import { useBoardPeople } from "../../hooks/useBoardPeople";
 
 import {
   SortableContext,
@@ -17,8 +18,14 @@ import TaskModal from "../Card/TaskModal";
 import { useBoard } from "../../context/BoardContext";
 
 const BoardColumn = ({ boardId, list, index = 0 }) => {
-  const { updateCard, deleteCard, createCard, updateList, deleteList } =
-    useBoard();
+  const {
+    updateCard,
+    deleteCard,
+    createCard,
+    updateList,
+    deleteList,
+    pauseSync,
+  } = useBoard();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [listMenuOpen, setListMenuOpen] = useState(false);
@@ -29,6 +36,11 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
 
   const meta = getListMeta(list.title, index);
   const menuRef = useRef(null);
+  const people = useBoardPeople(boardId);
+  useEffect(() => {
+    pauseSync(modalOpen);
+    return () => pauseSync(false);
+  }, [modalOpen, pauseSync]);
 
   useEffect(() => {
     if (!listMenuOpen) return;
@@ -227,6 +239,7 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
               <TaskCard
                 key={card.id}
                 card={card}
+                people={people}
                 onClick={() => handleOpenEdit(card)}
               />
             ))}
@@ -247,6 +260,7 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
           setEditingCard(null);
         }}
         card={editingCard}
+        people={people}
         onSubmit={handleSubmitCard}
         onDelete={handleDeleteCard}
       />
