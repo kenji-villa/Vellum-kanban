@@ -3,6 +3,8 @@ import { api } from "../../utils/api";
 import { useToast } from "../../context/ToastContext";
 import { useNotifications } from "../../context/NotificationContext";
 import PersonAvatar, { coverFor, assetUrl } from "./PersonAvatar";
+import { LINK_META, linkHref } from "../../utils/profileOptions";
+import LinkIcon from "../Profile/LinkIcon";
 
 const ProfileCard = ({ userId, onChanged }) => {
   const toast = useToast();
@@ -136,6 +138,23 @@ const ProfileCard = ({ userId, onChanged }) => {
             ))}
           </div>
         )}
+
+        <div className="flex gap-2 mt-4">
+          {Object.entries(user.links || {})
+            .filter(([k, v]) => v && LINK_META[k] && linkHref(k, v))
+            .map(([k, v]) => (
+              <a
+                key={k}
+                href={linkHref(k, v)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={LINK_META[k].label}
+                className="hover:-translate-y-0.5 transition-transform"
+              >
+                <LinkIcon type={k} size={32} />
+              </a>
+            ))}
+        </div>
 
         <div className="mt-5 pt-4 border-t border-gray-100 dark:border-slate-700">
           {user.relation === "self" && (
