@@ -271,5 +271,23 @@ export const removeTeammate = wrap(async (req, res) => {
     },
   });
   if (!count) return res.status(404).json({ message: "Teammate not found" });
+  // Removing a teammate also removes shared access between you, both ways
+await prisma.boardMember.deleteMany({
+  where: {
+    OR: [
+      { userId: other, board: { userId: me } },
+      { userId: me, board: { userId: other } },
+    ],
+  },
+});
+await prisma.card.updateMany({
+  where: {
+    OR: [
+      { assigneeId: other, list: { board: { userId: me } } },
+      { assigneeId: me, list: { board: { userId: other } } },
+    ],
+  },
+  data: { assigneeId: null, assignee: "" },
+});
   res.json({ ok: true });
 });
