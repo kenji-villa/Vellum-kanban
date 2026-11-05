@@ -227,6 +227,10 @@ export const BoardProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { isAuthenticated } = useAuth();
   const optimisticRef = useRef(new Map());
+  const syncPausedRef = useRef(false);
+  const pauseSync = useCallback((paused) => {
+    syncPausedRef.current = paused;
+  }, []);
 
   // ------------------------------------------------------------------
   // 1. reloadBoards — MUST be defined first so others can reference it
@@ -247,30 +251,33 @@ export const BoardProvider = ({ children }) => {
     }
   }, []);
 
+  const refreshBoards = useCallback(async () => {
+    if (syncPausedRef.current) return;
+    try {
+      const { boards } = await api.listBoards();
+      const fullBoards = await Promise.all(
+        boards.map(async (b) => (await api.getBoard(b.id)).board),
+      );
+      if (syncPausedRef.current) return;
+      dispatch({ type: "SET_BOARDS", payload: fullBoards });
+    } catch {
+      /* keep current data */
+    }
+  }, []);
+
   // Load boards when authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      dispatch({ type: "RESET" });
-      return;
-    }
-    const load = async () => {
-      dispatch({ type: "SET_LOADING", payload: true });
-      try {
-        const { boards } = await api.listBoards();
-        // We need full board data (lists + cards), so fetch each board's details
-        const fullBoards = await Promise.all(
-          boards.map(async (b) => {
-            const { board } = await api.getBoard(b.id);
-            return board;
-          }),
-        );
-        dispatch({ type: "SET_BOARDS", payload: fullBoards });
-      } catch (err) {
-        dispatch({ type: "SET_ERROR", payload: err.message });
-      }
+    if (!isAuthenticated) return;
+    const tick = () => {
+      if (document.visibilityState === "visible") refreshBoards();
     };
-    load();
-  }, [isAuthenticated]);
+    const id = setInterval(tick, 60000);
+    window.addEventListener("focus", tick);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", tick);
+    };
+  }, [isAuthenticated, refreshBoards]);
 
   // ------------------------------------------------------------
   // Public actions — optimistic, with rollback on failure
@@ -448,6 +455,8 @@ export const BoardProvider = ({ children }) => {
         deleteCard,
         moveCard,
         reloadBoards,
+        refreshBoards,
+        pauseSync,
       }}
     >
       {children}
