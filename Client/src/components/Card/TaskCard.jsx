@@ -31,6 +31,9 @@ const TaskCard = ({ card, onClick, people = [] }) => {
     isDragging,
   } = useSortable({ id: card.id, data: { type: "card", card } });
 
+  const done = card.status === "DONE";
+  const inReview = card.status === "SUBMITTED";
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -74,7 +77,19 @@ const TaskCard = ({ card, onClick, people = [] }) => {
         )}
       </div>
 
-      <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm leading-tight mb-1">
+      {inReview && (
+        <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+          In review
+        </span>
+      )}
+      {done && (
+        <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+          ✓ Done
+        </span>
+      )}
+      <h3
+        className={`"font-semibold text-gray-800 dark:text-gray-100 text-sm leading-tight mb-1 ${done ? "line-through opacity-60" : ""}`}
+      >
         {card.title}
       </h3>
 
