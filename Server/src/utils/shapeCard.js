@@ -7,5 +7,9 @@ export const shapeCard = (c) => ({
   labels: c.labels,
   assignee: c.assignee,
   assigneeId: c.assigneeId || "",
+  assignedById: c.assignedById || "",
+  status: c.status,
+  submittedAt: c.submittedAt,
+  completedAt: c.completedAt,
   comments: c.comments,
 });
