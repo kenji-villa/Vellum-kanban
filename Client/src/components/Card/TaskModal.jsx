@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "../UI/Modal";
 import TaskForm from "./TaskForm";
+import TaskWorkflow from "./TaskWorkflow";
 
 const TaskModal = ({
   isOpen,
@@ -9,6 +10,9 @@ const TaskModal = ({
   onSubmit,
   onDelete,
   people = [],
+  me,
+  boardRole,
+  onTransition,
 }) => {
   return (
     <Modal
@@ -26,6 +30,15 @@ const TaskModal = ({
         ) : null
       }
     >
+      {card && (
+        <TaskWorkflow
+          card={card}
+          me={me}
+          boardRole={boardRole}
+          people={people}
+          onAction={onTransition}
+        />
+      )}
       <TaskForm
         initialValues={card}
         onSubmit={onSubmit}
