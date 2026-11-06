@@ -60,6 +60,7 @@ export const createCard = async (req, res) => {
         assigneeId: assigneeUserId,
         position,
         listId: req.params.id,
+        assignedById: assigneeUserId ? req.user.id : null,
       },
     });
 
@@ -88,14 +89,21 @@ export const updateCard = async (req, res) => {
     }
 
     let newlyAssigned = null;
-    if ("assigneeId" in req.body) {
-      const id = req.body.assigneeId || null;
-      if (id && !(await isOnBoard(req.boardId, id))) {
-        return res.status(400).json({ message: "That person isn't on this board" });
-      }
-      data.assigneeId = id;
-      if (id && id !== req.card.assigneeId) newlyAssigned = id;
+if ("assigneeId" in req.body) {
+  const id = req.body.assigneeId || null;
+  if (id && !(await isOnBoard(req.boardId, id))) {
+    return res.status(400).json({ message: "That person isn't on this board" });
+  }
+  data.assigneeId = id;
+  if (id !== req.card.assigneeId) {
+    data.assignedById = id ? req.user.id : null; // remember who handed the task out
+    if (req.card.status === "SUBMITTED") {
+      data.status = "OPEN"; // new person, so they have to submit again
+      data.submittedAt = null;
     }
+    if (id) newlyAssigned = id;
+  }
+}
 
     const card = await prisma.card.update({ where: { id: req.params.id }, data });
     if (newlyAssigned) await notifyAssigned(card, req.boardId, req.user.id, newlyAssigned);
