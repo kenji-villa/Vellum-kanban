@@ -12,6 +12,7 @@ export const getAllCards = (boards) =>
         boardTitle: board.title,
         listTitle: list.title,
         isDone:
+          card.status === "DONE" ||
           list.title.toLowerCase().includes("done") ||
           list.title.toLowerCase().includes("complete"),
         isInProgress: list.title.toLowerCase().includes("progress"),
