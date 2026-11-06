@@ -7,9 +7,17 @@ import PersonAvatar from "../Team/PersonAvatar";
 
 const TABS = [
   { id: "all", label: "All" },
-  { id: "invites", label: "Team" },
+  { id: "invites", label: "Activity" },
   { id: "deadlines", label: "Deadlines" },
 ];
+
+const ACTIVITY_KINDS = new Set([
+  "shared",
+  "assigned",
+  "submitted",
+  "approved",
+  "changes",
+]);
 
 const dueLabel = (days) => {
   if (days < 0) return `Overdue by ${-days} day${days < -1 ? "s" : ""}`;
@@ -163,8 +171,28 @@ const AcceptedItem = ({ item, onOpen }) => (
   </li>
 );
 
+const ACTIVITY_TEXT = {
+  shared: (i) => ({
+    verb: "shared the board ",
+    subject: i.board?.title,
+    tail: " with you",
+  }),
+  assigned: (i) => ({ verb: "assigned you ", subject: i.card?.title }),
+  submitted: (i) => ({
+    verb: "submitted ",
+    subject: i.card?.title,
+    tail: " for review",
+  }),
+  approved: (i) => ({
+    verb: "marked ",
+    subject: i.card?.title,
+    tail: " as done ✓",
+  }),
+  changes: (i) => ({ verb: "requested changes on ", subject: i.card?.title }),
+};
+
 const ActivityItem = ({ item, onOpen }) => {
-  const shared = item.kind === "shared";
+  const t = ACTIVITY_TEXT[item.kind](item);
   return (
     <li>
       <button
@@ -175,16 +203,18 @@ const ActivityItem = ({ item, onOpen }) => {
         <PersonAvatar user={item.actor} size={40} />
         <div className="min-w-0 flex-1">
           <p className="text-sm text-gray-700 dark:text-gray-200 leading-snug">
-            <span className="font-semibold">{item.actor?.name}</span>{" "}
-            {shared ? "shared the board " : "assigned you "}
-            <span className="font-semibold">
-              {shared ? item.board?.title : item.card?.title}
-            </span>
-            {shared ? " with you" : ""}
+            <span className="font-semibold">{item.actor?.name}</span> {t.verb}
+            <span className="font-semibold">{t.subject}</span>
+            {t.tail || ""}
           </p>
-          {!shared && item.board && (
+          {item.kind !== "shared" && item.board && (
             <p className="text-[11px] text-gray-400 truncate">
               {item.board.title}
+            </p>
+          )}
+          {item.note && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1 line-clamp-2">
+              “{item.note}”
             </p>
           )}
           <p className="text-[11px] text-gray-400 mt-0.5">
@@ -237,7 +267,7 @@ const NotificationBell = () => {
     markRead(item);
     setOpen(false);
     if (item.kind === "deadline") navigate(`/board/${item.boardId}`);
-    else if ((item.kind === "shared" || item.kind === "assigned") && item.board)
+    else if (ACTIVITY_KINDS.has(item.kind) && item.board)
       navigate(`/board/${item.board.id}`);
     else navigate("/team");
   };
