@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useSettings } from "../../context/SettingsContext";
 import { useBoard } from "../../context/BoardContext";
-import { getListMeta } from "../../utils/listStyle";
+import { isCardDone } from "../../utils/listStyle";
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -29,10 +29,9 @@ const DashboardTopbar = () => {
       overdue = 0;
     for (const b of state.boards) {
       for (const l of b.lists) {
-        const isDone = getListMeta(l.title).kind === "done";
         for (const c of l.cards) {
           total++;
-          if (isDone) {
+          if (isCardDone(c, l)) {
             done++;
           } else {
             if (c.priority === "high") urgent++;
