@@ -16,6 +16,7 @@ import { CSS } from "@dnd-kit/utilities";
 import TaskCard from "../Card/TaskCard";
 import TaskModal from "../Card/TaskModal";
 import { useBoard } from "../../context/BoardContext";
+import { useAuth } from "../../context/AuthContext";
 
 const BoardColumn = ({ boardId, list, index = 0 }) => {
   const {
@@ -25,6 +26,8 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
     updateList,
     deleteList,
     pauseSync,
+    state,
+    transitionCard,
   } = useBoard();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
@@ -33,6 +36,9 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
   const [newTitle, setNewTitle] = useState(list.title);
   const toast = useToast();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { user } = useAuth();
+  const boardRole = state.boards.find((b) => b.id === boardId)?.role;
 
   const meta = getListMeta(list.title, index);
   const menuRef = useRef(null);
@@ -111,6 +117,32 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
     }
     setModalOpen(false);
     setEditingCard(null);
+  };
+
+  const handleTransition = async (action, note) => {
+    try {
+      const updated = await transitionCard(
+        boardId,
+        list.id,
+        editingCard.id,
+        action,
+        note,
+      );
+      const messages = {
+        submit:
+          updated.status === "DONE"
+            ? "Task marked as done ✓"
+            : "Submitted for review",
+        approve: "Task marked as done ✓",
+        request_changes: "Changes requested",
+        reopen: "Task reopened",
+      };
+      toast.success(messages[action]);
+      setModalOpen(false);
+      setEditingCard(null);
+    } catch (err) {
+      toast.error(err.message || "Something went wrong");
+    }
   };
 
   // --- List Handlers ---
@@ -263,6 +295,9 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
         people={people}
         onSubmit={handleSubmitCard}
         onDelete={handleDeleteCard}
+        me={user?.id}
+        boardRole={boardRole}
+        onTransition={handleTransition}
       />
       <ConfirmDialog
         isOpen={confirmOpen}
