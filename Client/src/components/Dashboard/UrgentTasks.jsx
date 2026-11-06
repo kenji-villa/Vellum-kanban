@@ -1,6 +1,8 @@
 import React from "react";
 import { useBoard } from "../../context/BoardContext";
 import { differenceInCalendarDays, isBefore, startOfDay } from "date-fns";
+import { useAuth } from "../../context/AuthContext";
+import { isCardDone } from "../../utils/listStyle";
 
 const priorityDot = {
   high: "bg-red-500",
@@ -11,15 +13,24 @@ const priorityDot = {
 const UrgentTasks = () => {
   const { state } = useBoard();
   const today = startOfDay(new Date());
+  const { user } = useAuth();
 
   // Gather all cards across boards, filter urgent (high priority OR overdue/due soon)
   const allCards = state.boards.flatMap((board) =>
     board.lists.flatMap((list) =>
-      list.cards.map((card) => ({
-        ...card,
-        boardTitle: board.title,
-        listTitle: list.title,
-      })),
+      list.cards
+        .filter((card) => {
+          if (isCardDone(card, list) || card.status === "SUBMITTED")
+            return false;
+          return card.assigneeId
+            ? card.assigneeId === user?.id
+            : board.role !== "member";
+        })
+        .map((card) => ({
+          ...card,
+          boardTitle: board.title,
+          listTitle: list.title,
+        })),
     ),
   );
 
