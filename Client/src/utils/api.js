@@ -101,6 +101,9 @@ export const api = {
   moveCard: (id, payload) =>
     request(`/cards/${id}/move`, { method: "PATCH", body: payload }),
 
+    transitionCard: (id, action, note) =>
+    request(`/cards/${id}/status`, { method: "POST", body: { action, note } }),
+
     // --- Team ---
   searchUsers: (q) => request(`/users/search?q=${encodeURIComponent(q)}`),
   getUserProfile: (id) => request(`/users/${id}/profile`),

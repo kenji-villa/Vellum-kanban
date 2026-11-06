@@ -11,3 +11,6 @@ export const getListMeta = (title = "", index = 0) => {
   if (hit) return { kind: hit.kind, color: hit.color };
   return { kind: "custom", color: COLORS[index % COLORS.length] };
 };
+// A card is done if it was approved/completed, or sits in a "Done"-style list
+export const isCardDone = (card, list) =>
+  card.status === "DONE" || getListMeta(list?.title || "").kind === "done";
