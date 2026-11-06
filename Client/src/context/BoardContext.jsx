@@ -438,6 +438,18 @@ export const BoardProvider = ({ children }) => {
     [state.boards, reloadBoards],
   );
 
+  const transitionCard = useCallback(
+    async (boardId, listId, cardId, action, note) => {
+      const { card } = await api.transitionCard(cardId, action, note);
+      dispatch({
+        type: "UPDATE_CARD",
+        payload: { boardId, listId, cardId, updates: card },
+      });
+      return card;
+    },
+    [],
+  );
+
   return (
     <BoardContext.Provider
       value={{
@@ -454,6 +466,7 @@ export const BoardProvider = ({ children }) => {
         updateCard,
         deleteCard,
         moveCard,
+        transitionCard,
         reloadBoards,
         refreshBoards,
         pauseSync,
