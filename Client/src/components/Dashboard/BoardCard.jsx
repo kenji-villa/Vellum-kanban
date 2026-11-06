@@ -6,6 +6,7 @@ import ConfirmDialog from "../UI/ConfirmDialog";
 import { getListMeta } from "../../utils/listStyle";
 import { api } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
+import { isCardDone } from "../../utils/listStyle";
 
 const BoardCard = ({ board }) => {
   const navigate = useNavigate();
@@ -80,8 +81,7 @@ const BoardCard = ({ board }) => {
   const totalCards = board.lists.reduce((acc, l) => acc + l.cards.length, 0);
 
   const doneCards = board.lists.reduce(
-    (acc, l) =>
-      acc + (getListMeta(l.title).kind === "done" ? l.cards.length : 0),
+    (acc, l) => acc + l.cards.filter((c) => isCardDone(c, l)).length,
     0,
   );
   const progress = totalCards ? Math.round((doneCards / totalCards) * 100) : 0;
