@@ -33,7 +33,6 @@ const BoardPage = () => {
         <Header />
         <BoardBar board={activeBoard} />
         <Board board={activeBoard} />
-        <Board board={activeBoard} />
       </div>
     </div>
   );
