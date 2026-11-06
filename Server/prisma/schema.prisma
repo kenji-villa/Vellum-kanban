@@ -12,6 +12,12 @@ enum InvitationStatus {
   DECLINED
 }
 
+enum CardStatus {
+  OPEN
+  SUBMITTED
+  DONE
+}
+
 model BoardMember {
   id        String   @id @default(cuid())
   boardId   String
@@ -50,6 +56,7 @@ model User {
   notificationsActed Notification[] @relation("NotificationActor")
   boardMemberships BoardMember[]
   assignedCards    Card[] @relation("CardAssignee")
+  cardsAssignedByMe Card[] @relation("CardAssigner")
 
   @@map("users")
 }
@@ -85,6 +92,7 @@ model Notification {
   invitation   Invitation? @relation(fields: [invitationId], references: [id], onDelete: Cascade)
   boardId String?
   cardId  String?
+  note String?
   board   Board? @relation(fields: [boardId], references: [id], onDelete: Cascade)
   card    Card?  @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
@@ -136,6 +144,11 @@ model Card {
   assigneeId    String?
   assigneeUser  User?  @relation("CardAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   notifications Notification[]
+  status       CardStatus @default(OPEN)
+  assignedById String?
+  assignedBy   User?      @relation("CardAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+  submittedAt  DateTime?
+  completedAt  DateTime?
 
   @@map("cards")
 }
