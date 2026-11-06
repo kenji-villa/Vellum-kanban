@@ -11,7 +11,7 @@ import { differenceInCalendarDays, startOfDay } from "date-fns";
 import { api } from "../utils/api";
 import { useAuth } from "./AuthContext";
 import { useBoard } from "./BoardContext";
-import { getListMeta } from "../utils/listStyle";
+import { isCardDone } from "../utils/listStyle";
 
 const NotificationContext = createContext();
 
@@ -25,6 +25,9 @@ const KINDS = {
   INVITE_ACCEPTED: "accepted",
   BOARD_SHARED: "shared",
   TASK_ASSIGNED: "assigned",
+  TASK_SUBMITTED: "submitted",
+  TASK_APPROVED: "approved",
+  TASK_CHANGES_REQUESTED: "changes",
 };
 
 const loadSeen = () => {
@@ -47,9 +50,10 @@ const buildDeadlineItems = (boards, meId) => {
   const out = [];
   for (const b of boards) {
     for (const l of b.lists) {
-      if (getListMeta(l.title).kind === "done") continue;
       for (const c of l.cards) {
         if (!c.dueDate) continue;
+        // Finished or waiting on a reviewer: nothing left to warn about
+        if (isCardDone(c, l) || c.status === "SUBMITTED") continue;
         // Only tasks that are yours: assigned to you, or unassigned on a board you own
         const mine = c.assigneeId ? c.assigneeId === meId : b.role !== "member";
         if (!mine) continue;
@@ -155,6 +159,7 @@ export const NotificationProvider = ({ children }) => {
       invitation: n.invitation,
       board: n.board,
       card: n.card,
+      note: n.note,
     }));
     const pending = serverItems.filter(
       (i) => i.kind === "invite" && i.invitation?.status === "PENDING",
