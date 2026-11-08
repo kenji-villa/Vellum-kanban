@@ -1,30 +1,33 @@
 import prisma from "../prisma.js";
 import { shapeCard } from "../utils/shapeCard.js";
+import { logActivity } from "../utils/activity.js";
 
-const isOnBoard = async (boardId, userId) => {
-  const b = await prisma.board.findFirst({
-    where: { id: boardId, OR: [{ userId }, { members: { some: { userId } } }] },
-    select: { id: true },
+// Owner or editor of the board (viewers can't be assigned work)
+const findEditor = (boardId, userId) =>
+  prisma.user.findFirst({
+    where: {
+      id: userId,
+      OR: [
+        { boards: { some: { id: boardId } } },
+        { boardMemberships: { some: { boardId, role: "EDITOR" } } },
+      ],
+    },
+    select: { id: true, name: true },
   });
-  return !!b;
-};
+
+const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
 
 const notifyAssigned = async (card, boardId, actorId, assigneeId) => {
   if (!assigneeId || assigneeId === actorId) return;
   await prisma.notification.create({
-    data: {
-      userId: assigneeId,
-      type: "TASK_ASSIGNED",
-      actorId,
-      boardId,
-      cardId: card.id,
-    },
+    data: { userId: assigneeId, type: "TASK_ASSIGNED", actorId, boardId, cardId: card.id },
   });
 };
 
 // POST /api/lists/:id/cards
 export const createCard = async (req, res) => {
   try {
+    const me = req.user.id;
     const {
       title = "New Task",
       description = "",
@@ -35,12 +38,12 @@ export const createCard = async (req, res) => {
       assigneeId,
     } = req.body || {};
 
-    let assigneeUserId = null;
+    let person = null;
     if (assigneeId) {
-      if (!(await isOnBoard(req.boardId, assigneeId))) {
-        return res.status(400).json({ message: "That person isn't on this board" });
+      person = await findEditor(req.boardId, assigneeId);
+      if (!person) {
+        return res.status(400).json({ message: "That person can't be assigned on this board" });
       }
-      assigneeUserId = assigneeId;
     }
 
     const last = await prisma.card.findFirst({
@@ -56,15 +59,26 @@ export const createCard = async (req, res) => {
         priority,
         dueDate: dueDate ? new Date(dueDate) : null,
         labels,
-        assignee,
-        assigneeId: assigneeUserId,
+        assignee: assignee || person?.name || "",
+        assigneeId: person?.id || null,
+        assignedById: person ? me : null,
         position,
         listId: req.params.id,
-        assignedById: assigneeUserId ? req.user.id : null,
       },
     });
 
-    await notifyAssigned(card, req.boardId, req.user.id, assigneeUserId);
+    await logActivity(null, { cardId: card.id, boardId: req.boardId, actorId: me, type: "CREATED" });
+    if (person) {
+      await logActivity(null, {
+        cardId: card.id,
+        boardId: req.boardId,
+        actorId: me,
+        type: "ASSIGNED",
+        meta: { toId: person.id, toName: person.name },
+      });
+    }
+    await notifyAssigned(card, req.boardId, me, person?.id);
+
     res.status(201).json({ card: shapeCard(card) });
   } catch (err) {
     console.error("createCard error:", err);
@@ -75,7 +89,9 @@ export const createCard = async (req, res) => {
 // PATCH /api/cards/:id
 export const updateCard = async (req, res) => {
   try {
-    const allowed = ["title", "description", "priority", "dueDate", "labels", "assignee", "comments"];
+    const me = req.user.id;
+    const old = req.card;
+    const allowed = ["title", "description", "priority", "dueDate", "labels", "assignee"];
     const data = {};
     for (const key of allowed) {
       if (key in req.body) {
@@ -88,25 +104,47 @@ export const updateCard = async (req, res) => {
       }
     }
 
+    const events = [];
     let newlyAssigned = null;
-if ("assigneeId" in req.body) {
-  const id = req.body.assigneeId || null;
-  if (id && !(await isOnBoard(req.boardId, id))) {
-    return res.status(400).json({ message: "That person isn't on this board" });
-  }
-  data.assigneeId = id;
-  if (id !== req.card.assigneeId) {
-    data.assignedById = id ? req.user.id : null; // remember who handed the task out
-    if (req.card.status === "SUBMITTED") {
-      data.status = "OPEN"; // new person, so they have to submit again
-      data.submittedAt = null;
-    }
-    if (id) newlyAssigned = id;
-  }
-}
 
-    const card = await prisma.card.update({ where: { id: req.params.id }, data });
-    if (newlyAssigned) await notifyAssigned(card, req.boardId, req.user.id, newlyAssigned);
+    if ("assigneeId" in req.body) {
+      const id = req.body.assigneeId || null;
+      if (id !== old.assigneeId) {
+        let person = null;
+        if (id) {
+          person = await findEditor(req.boardId, id);
+          if (!person) {
+            return res.status(400).json({ message: "That person can't be assigned on this board" });
+          }
+        }
+        data.assigneeId = id;
+        data.assignedById = id ? me : null; // remember who handed the task out
+        if (old.status === "SUBMITTED") {
+          data.status = "OPEN"; // new person, so they have to submit again
+          data.submittedAt = null;
+        }
+        if (id) {
+          newlyAssigned = id;
+          events.push({ type: "ASSIGNED", meta: { toId: id, toName: person.name } });
+        } else {
+          events.push({ type: "UNASSIGNED", meta: { fromName: old.assignee || null } });
+        }
+      }
+    }
+
+    if ("priority" in data && data.priority !== old.priority) {
+      events.push({ type: "PRIORITY", meta: { from: old.priority, to: data.priority } });
+    }
+    if ("dueDate" in data && fmtDate(data.dueDate) !== fmtDate(old.dueDate)) {
+      events.push({ type: "DUE", meta: { from: fmtDate(old.dueDate), to: fmtDate(data.dueDate) } });
+    }
+
+    const card = await prisma.card.update({ where: { id: old.id }, data });
+
+    for (const e of events) {
+      await logActivity(null, { cardId: card.id, boardId: req.boardId, actorId: me, ...e });
+    }
+    if (newlyAssigned) await notifyAssigned(card, req.boardId, me, newlyAssigned);
 
     res.json({ card: shapeCard(card) });
   } catch (err) {
@@ -168,6 +206,16 @@ export const moveCard = async (req, res) => {
         }
       }
     });
+
+    if (fromListId !== toListId) {
+      await logActivity(null, {
+        cardId: card.id,
+        boardId: req.boardId,
+        actorId: req.user.id,
+        type: "MOVED",
+        meta: { from: card.list.title, to: toList.title },
+      });
+    }
 
     res.json({ message: "Moved" });
   } catch (err) {

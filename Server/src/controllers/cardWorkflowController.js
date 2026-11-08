@@ -1,9 +1,13 @@
 import prisma from "../prisma.js";
 import { shapeCard } from "../utils/shapeCard.js";
+import { logActivity } from "../utils/activity.js";
 
 const isOnBoard = async (boardId, userId) => {
   const b = await prisma.board.findFirst({
-    where: { id: boardId, OR: [{ userId }, { members: { some: { userId } } }] },
+    where: {
+      id: boardId,
+      OR: [{ userId }, { members: { some: { userId, role: "EDITOR" } } }],
+    },
     select: { id: true },
   });
   return !!b;
@@ -103,6 +107,14 @@ export const transitionCard = async (req, res) => {
 
     const updated = await prisma.$transaction(async (tx) => {
       const c = await tx.card.update({ where: { id: card.id }, data });
+      await logActivity(tx, {
+  cardId: card.id,
+  boardId: req.boardId,
+  actorId: me,
+  type: "STATUS",
+  body: note,
+  meta: { action, status: data.status },
+});
       for (const n of notifications) {
         await tx.notification.create({
           data: {

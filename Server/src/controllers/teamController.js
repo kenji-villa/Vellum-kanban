@@ -1,4 +1,5 @@
 import prisma from "../prisma.js";
+import { leaveUserFromBoard, emitToUser } from "../realtime.js";
 
 const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // wait before re-inviting someone who declined
 const PUBLIC_USER = { id: true, name: true, title: true, avatarUrl: true };
@@ -272,14 +273,17 @@ export const removeTeammate = wrap(async (req, res) => {
   });
   if (!count) return res.status(404).json({ message: "Teammate not found" });
   // Removing a teammate also removes shared access between you, both ways
-await prisma.boardMember.deleteMany({
-  where: {
-    OR: [
-      { userId: other, board: { userId: me } },
-      { userId: me, board: { userId: other } },
-    ],
-  },
+const sharedWhere = {
+  OR: [
+    { userId: other, board: { userId: me } },
+    { userId: me, board: { userId: other } },
+  ],
+};
+const sharedLinks = await prisma.boardMember.findMany({
+  where: sharedWhere,
+  select: { userId: true, boardId: true },
 });
+await prisma.boardMember.deleteMany({ where: sharedWhere });
 await prisma.card.updateMany({
   where: {
     OR: [
@@ -289,5 +293,8 @@ await prisma.card.updateMany({
   },
   data: { assigneeId: null, assignee: "" },
 });
+sharedLinks.forEach((l) => leaveUserFromBoard(l.userId, l.boardId));
+emitToUser(me, "boards:changed");
+emitToUser(other, "boards:changed");
   res.json({ ok: true });
 });
