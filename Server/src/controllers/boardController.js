@@ -1,5 +1,6 @@
 import prisma from "../prisma.js";
 import { shapeCard } from "../utils/shapeCard.js";
+import { joinUserToBoard, emitToUser } from "../realtime.js";
 
 const DEFAULT_LISTS = ["To Do", "In Progress", "Done"];
 const PUBLIC_USER = { id: true, name: true, title: true, avatarUrl: true };
@@ -37,9 +38,9 @@ export const getBoard = async (req, res) => {
       include: {
         user: { select: PUBLIC_USER },
         members: {
-          orderBy: { createdAt: "asc" },
           include: { user: { select: PUBLIC_USER } },
         },
+        labels: { orderBy: { createdAt: "asc" } },
         lists: {
           orderBy: { position: "asc" },
           include: { cards: { orderBy: { position: "asc" } } },
@@ -54,7 +55,8 @@ export const getBoard = async (req, res) => {
         title: board.title,
         role: req.boardRole,
         owner: board.user,
-        members: board.members.map((m) => m.user),
+        members: board.members.map((m) => ({ ...m.user, role: m.role.toLowerCase() })),
+        labels: board.labels.map((l) => ({ id: l.id, name: l.name, color: l.color })),
         lists: board.lists.map((l) => ({
           id: l.id,
           title: l.title,
@@ -83,7 +85,8 @@ export const createBoard = async (req, res) => {
       },
       include: { lists: { orderBy: { position: "asc" } } },
     });
-
+    joinUserToBoard(req.user.id, board.id);
+emitToUser(req.user.id, "boards:changed");
     res.status(201).json({
       board: {
         id: board.id,
@@ -91,6 +94,7 @@ export const createBoard = async (req, res) => {
         role: "owner",
         owner: { id: req.user.id },
         members: [],
+        labels: [],
         lists: board.lists.map((l) => ({ id: l.id, title: l.title, cards: [] })),
       },
     });
