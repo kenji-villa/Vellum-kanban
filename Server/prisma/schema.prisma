@@ -18,6 +18,29 @@ enum CardStatus {
   DONE
 }
 
+enum BoardRole {
+  EDITOR
+  VIEWER
+}
+
+model CardActivity {
+  id        String   @id @default(cuid())
+  cardId    String
+  boardId   String
+  actorId   String?
+  type      String
+  body      String?
+  meta      Json?
+  createdAt DateTime @default(now())
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  actor     User?    @relation("ActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([cardId, createdAt])
+  @@index([boardId, createdAt])
+  @@map("card_activities")
+}
+
 model BoardMember {
   id        String   @id @default(cuid())
   boardId   String
@@ -25,6 +48,7 @@ model BoardMember {
   createdAt DateTime @default(now())
   board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role BoardRole @default(EDITOR)
 
   @@unique([boardId, userId])
   @@index([userId])
@@ -57,6 +81,7 @@ model User {
   boardMemberships BoardMember[]
   assignedCards    Card[] @relation("CardAssignee")
   cardsAssignedByMe Card[] @relation("CardAssigner")
+  activities CardActivity[] @relation("ActivityActor")
 
   @@map("users")
 }
@@ -97,6 +122,7 @@ model Notification {
   card    Card?  @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -108,8 +134,10 @@ model Board {
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lists     List[]
+  labels BoardLabel[]
   members       BoardMember[]
   notifications Notification[]
+  activities CardActivity[]
 
   @@map("boards")
 }
@@ -149,6 +177,19 @@ model Card {
   assignedBy   User?      @relation("CardAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
   submittedAt  DateTime?
   completedAt  DateTime?
+  activities CardActivity[]
 
   @@map("cards")
+}
+
+model BoardLabel {
+  id        String   @id @default(cuid())
+  boardId   String
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, name])
+  @@map("board_labels")
 }
