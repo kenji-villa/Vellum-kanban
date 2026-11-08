@@ -1,3 +1,5 @@
+import { getSocketId } from "./socket";
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 const TOKEN_KEY = "vellum_token_v1";
 
@@ -22,6 +24,9 @@ const request = async (path, { method = "GET", body, auth = true } = {}) => {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }
+
+  const socketId = getSocketId();
+  if (socketId) headers["X-Socket-Id"] = socketId; 
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -75,11 +80,19 @@ export const api = {
 
     // --- Board sharing ---
   getBoardMembers: (boardId) => request(`/boards/${boardId}/members`),
-  addBoardMember: (boardId, userId) =>
-    request(`/boards/${boardId}/members`, { method: "POST", body: { userId } }),
-  removeBoardMember: (boardId, userId) =>
-    request(`/boards/${boardId}/members/${userId}`, { method: "DELETE" }),
+    addBoardMember: (boardId, userId, role) =>
+    request(`/boards/${boardId}/members`, { method: "POST", body: { userId, role } }),
+    removeBoardMember: (boardId, userId) =>
+  request(`/boards/${boardId}/members/${userId}`, { method: "DELETE" }),
+  updateBoardMemberRole: (boardId, userId, role) =>
+    request(`/boards/${boardId}/members/${userId}`, { method: "PATCH", body: { role } }),
 
+  getCardActivity: (id) => request(`/cards/${id}/activity`),
+  addComment: (id, body) =>
+    request(`/cards/${id}/comments`, { method: "POST", body: { body } }),
+  deleteComment: (id, commentId) =>
+    request(`/cards/${id}/comments/${commentId}`, { method: "DELETE" }),
+  getBoardActivity: (boardId) => request(`/boards/${boardId}/activity`),
   // --- Lists ---
   createList: (boardId, payload) =>
     request(`/boards/${boardId}/lists`, { method: "POST", body: payload }),
@@ -103,6 +116,11 @@ export const api = {
 
     transitionCard: (id, action, note) =>
     request(`/cards/${id}/status`, { method: "POST", body: { action, note } }),
+
+      createLabel: (boardId, name, color) =>
+    request(`/boards/${boardId}/labels`, { method: "POST", body: { name, color } }),
+  deleteLabel: (boardId, labelId) =>
+    request(`/boards/${boardId}/labels/${labelId}`, { method: "DELETE" }),
 
     // --- Team ---
   searchUsers: (q) => request(`/users/search?q=${encodeURIComponent(q)}`),
