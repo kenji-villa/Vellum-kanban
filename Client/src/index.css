@@ -138,3 +138,164 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* =========================================================
+   App visuals: page background + small animations
+   ========================================================= */
+
+/* --- Page background: dot grid + drifting colour glows --- */
+.app-bg {
+  position: relative;
+  isolation: isolate;
+  background-color: #f5f6fb;
+}
+
+/* Layer 1: dot grid that fades out toward the bottom */
+.app-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: radial-gradient(
+    rgba(30, 39, 87, 0.16) 1px,
+    transparent 1.4px
+  );
+  background-size: 24px 24px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    transparent 100%
+  );
+}
+
+/* Layer 2: colour glows that drift slowly */
+.app-bg::after {
+  content: "";
+  position: fixed;
+  inset: -4%; /* a little oversized so the drift never shows an edge */
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform;
+  background:
+    radial-gradient(
+      42rem 30rem at 92% -4%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      36rem 28rem at -4% 14%,
+      rgba(99, 102, 241, 0.16),
+      transparent 65%
+    ),
+    radial-gradient(
+      40rem 30rem at 72% 104%,
+      rgba(56, 189, 248, 0.16),
+      transparent 65%
+    ),
+    radial-gradient(
+      30rem 24rem at 8% 98%,
+      rgba(236, 72, 153, 0.09),
+      transparent 65%
+    );
+  animation: bg-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes bg-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-1.5%, 1.5%, 0) scale(1.05);
+  }
+}
+
+/* Dark mode */
+.dark .app-bg {
+  background-color: #0f172a;
+}
+.dark .app-bg::before {
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.09) 1px,
+    transparent 1.4px
+  );
+}
+.dark .app-bg::after {
+  background:
+    radial-gradient(
+      42rem 30rem at 92% -4%,
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      36rem 28rem at -4% 14%,
+      rgba(99, 102, 241, 0.24),
+      transparent 65%
+    ),
+    radial-gradient(
+      40rem 30rem at 72% 104%,
+      rgba(56, 189, 248, 0.12),
+      transparent 65%
+    ),
+    radial-gradient(
+      30rem 24rem at 8% 98%,
+      rgba(236, 72, 153, 0.1),
+      transparent 65%
+    );
+}
+
+/* --- Entrance + hover animations used by the dashboard, team and profile pages --- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.card-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -12px rgba(30, 39, 87, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-bg::after,
+  .animate-rise,
+  .animate-float {
+    animation: none;
+  }
+  .card-lift:hover {
+    transform: none;
+  }
+}
