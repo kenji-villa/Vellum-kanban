@@ -1,0 +1,1 @@
+export const canEditBoard = (role) => role === "owner" || role === "editor";
