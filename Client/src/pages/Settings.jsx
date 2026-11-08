@@ -18,7 +18,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState("appearance");
 
   return (
-    <div className="flex min-h-screen bg-[#f4f4f4] dark:bg-[#0f172a]">
+    <div className="flex min-h-screen app-bg">
       <Sidebar />
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="mb-6">

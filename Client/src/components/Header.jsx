@@ -19,7 +19,7 @@ const Header = () => {
   const avatarUrl = user?.avatarUrl ? `${API_BASE}${user.avatarUrl}` : null;
 
   return (
-    <header className="h-16 bg-gray-100 dark:bg-[#0f172a] flex items-center justify-between px-8 border-b border-gray-200 dark:border-slate-800 shrink-0">
+    <header className="h-16 bg-white/50 dark:bg-[#0f172a]/50 backdrop-blur-md flex items-center justify-between px-8 border-b border-gray-200/70 dark:border-slate-800 shrink-0">
       <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
         Vellum
       </h1>
