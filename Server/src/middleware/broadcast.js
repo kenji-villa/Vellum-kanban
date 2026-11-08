@@ -1,7 +1,7 @@
 import prisma from "../prisma.js";
 import { emitToBoard, emitToUser, closeBoardRoom } from "../realtime.js";
 
-// After every successful write: tell the board's room to re-fetch, and tell
+
 // anyone who just received a notification.
 export const broadcastChanges = (req, res, next) => {
   if (req.method === "GET") return next();
