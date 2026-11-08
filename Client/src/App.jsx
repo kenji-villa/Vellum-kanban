@@ -21,6 +21,7 @@ import TeamPage from "./pages/TeamPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProjectsRedirect from "./pages/ProjectsRedirect";
 import { NotificationProvider } from "./context/NotificationContext";
+import RealtimeSync from "./components/RealtimeSync";
 
 function App() {
   return (
@@ -29,81 +30,80 @@ function App() {
         <ToastProvider>
           <BoardProvider>
             <NotificationProvider>
+              <RealtimeSync />
               <Router>
-                <div className="min-h-screen bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100 font-sans">
-                  <Routes>
-                    {/* Public */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
+                <Routes>
+                  {/* Public */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
 
-                    {/* Protected */}
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/projects"
-                      element={
-                        <ProtectedRoute>
-                          <ProjectsRedirect />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/board/:boardId"
-                      element={
-                        <ProtectedRoute>
-                          <BoardPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/calendar"
-                      element={
-                        <ProtectedRoute>
-                          <CalendarPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/analytics"
-                      element={
-                        <ProtectedRoute>
-                          <AnalyticsPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/profile"
-                      element={
-                        <ProtectedRoute>
-                          <ProfilePage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <ProtectedRoute>
-                          <Settings />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/team"
-                      element={
-                        <ProtectedRoute>
-                          <TeamPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </Routes>
-                </div>
+                  {/* Protected */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/projects"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectsRedirect />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/board/:boardId"
+                    element={
+                      <ProtectedRoute>
+                        <BoardPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/calendar"
+                    element={
+                      <ProtectedRoute>
+                        <CalendarPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <AnalyticsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/team"
+                    element={
+                      <ProtectedRoute>
+                        <TeamPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
               </Router>
             </NotificationProvider>
           </BoardProvider>
