@@ -22,6 +22,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ProjectsRedirect from "./pages/ProjectsRedirect";
 import { NotificationProvider } from "./context/NotificationContext";
 import RealtimeSync from "./components/RealtimeSync";
+import GlobalShortcuts from "./components/GlobalShortcuts";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <NotificationProvider>
               <RealtimeSync />
               <Router>
+                <GlobalShortcuts />
                 <Routes>
                   {/* Public */}
                   <Route path="/" element={<LandingPage />} />
