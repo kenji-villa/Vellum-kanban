@@ -2,6 +2,7 @@ import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import PersonAvatar from "../Team/PersonAvatar";
+import { labelColor } from "../../utils/labels";
 
 const priorityDot = {
   high: "bg-red-500",
@@ -9,18 +10,7 @@ const priorityDot = {
   low: "bg-green-500",
 };
 
-const labelColors = {
-  Design: "bg-pink-100 text-pink-700",
-  UI: "bg-purple-100 text-purple-700",
-  Development: "bg-blue-100 text-blue-700",
-  Bug: "bg-red-100 text-red-700",
-  System: "bg-gray-200 text-gray-700",
-  Shipped: "bg-green-100 text-green-700",
-  Research: "bg-orange-100 text-orange-700",
-  Marketing: "bg-yellow-100 text-yellow-700",
-};
-
-const TaskCard = ({ card, onClick, people = [] }) => {
+const TaskCard = ({ card, onClick, people = [], boardLabels = [] }) => {
   const person = people.find((p) => p.id === card.assigneeId);
   const {
     attributes,
@@ -104,9 +94,7 @@ const TaskCard = ({ card, onClick, people = [] }) => {
           {card.labels.map((label) => (
             <span
               key={label}
-              className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                labelColors[label] || "bg-gray-100 text-gray-600"
-              }`}
+              className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${labelColor(label, boardLabels).pill}`}
             >
               {label}
             </span>
