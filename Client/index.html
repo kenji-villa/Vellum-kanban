@@ -5,8 +5,37 @@
     <link rel="icon" type="image/svg+xml" href="/Icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vellum | The blank page for your projects</title>
+
+    <!-- Never show white while the app loads -->
+    <style>
+      html,
+      body {
+        background-color: #f5f6fb;
+      }
+      html.dark,
+      html.dark body {
+        background-color: #0f172a;
+      }
+    </style>
+    <script>
+      // Apply the saved theme and accent before the first paint
+      (function () {
+        try {
+          var s = JSON.parse(
+            localStorage.getItem("vellum_settings_v1") || "{}",
+          );
+          var dark =
+            s.theme === "dark" ||
+            (s.theme === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+          if (s.accent)
+            document.documentElement.setAttribute("data-accent", s.accent);
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body>
+  <body class="app-bg">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

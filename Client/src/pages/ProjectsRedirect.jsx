@@ -5,7 +5,7 @@ import { useBoard } from "../context/BoardContext";
 import { useToast } from "../context/ToastContext";
 
 const Shell = ({ children }) => (
-  <div className="flex min-h-screen app-bg">
+  <div className="flex min-h-screen">
     <Sidebar />
     <div className="flex-1 flex items-center justify-center p-8">
       {children}
@@ -26,6 +26,15 @@ const MiniColumn = ({ title, cards }) => (
     ))}
   </div>
 );
+
+// Reopen the board you were last on, otherwise the first one
+const pickBoard = (boards) => {
+  let last = null;
+  try {
+    last = localStorage.getItem("vellum_last_board");
+  } catch {}
+  return boards.find((b) => b.id === last) || boards[0];
+};
 
 const ProjectsRedirect = () => {
   const { state, createBoard, reloadBoards } = useBoard();
@@ -61,9 +70,13 @@ const ProjectsRedirect = () => {
     );
   }
 
-  // Has boards: go to the first one
+  // Has boards
   if (state.boards.length > 0) {
-    return <Navigate to={`/board/${state.boards[0].id}`} replace />;
+    return (
+      <Shell>
+        <Navigate to={`/board/${pickBoard(state.boards).id}`} replace />
+      </Shell>
+    );
   }
 
   // No boards: onboarding
