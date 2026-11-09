@@ -7,17 +7,32 @@ import { useAuth } from "../../context/AuthContext";
 import { useBoard } from "../../context/BoardContext";
 import { useToast } from "../../context/ToastContext";
 
+const ROLE_LABEL = { editor: "Editor", viewer: "Viewer" };
+
+const RoleSelect = ({ value, onChange, disabled }) => (
+  <select
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    disabled={disabled}
+    className="text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-gray-100 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] disabled:opacity-60"
+  >
+    <option value="editor">Editor · can edit</option>
+    <option value="viewer">Viewer · view only</option>
+  </select>
+);
+
 const ShareBoardModal = ({ isOpen, onClose, board }) => {
   const { user } = useAuth();
   const { refreshBoards } = useBoard();
   const toast = useToast();
   const navigate = useNavigate();
-  const isOwner = board.role !== "member";
+  const isOwner = board.role === "owner";
 
   const [data, setData] = useState({ owner: null, members: [] });
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [newRole, setNewRole] = useState("editor");
 
   const load = async () => {
     try {
@@ -47,12 +62,30 @@ const ShareBoardModal = ({ isOpen, onClose, board }) => {
   const add = async (p) => {
     setBusyId(p.id);
     try {
-      await api.addBoardMember(board.id, p.id);
-      toast.success(`${p.name} can now work on this board`);
+      await api.addBoardMember(board.id, p.id, newRole);
+      toast.success(
+        newRole === "viewer"
+          ? `${p.name} can now view this board`
+          : `${p.name} can now work on this board`,
+      );
       await load();
       refreshBoards();
     } catch (err) {
       toast.error(err.message || "Couldn't add person");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const changeRole = async (m, role) => {
+    setBusyId(m.id);
+    try {
+      await api.updateBoardMemberRole(board.id, m.id, role);
+      toast.success(`${m.name} is now ${ROLE_LABEL[role].toLowerCase()}`);
+      await load();
+      refreshBoards();
+    } catch (err) {
+      toast.error(err.message || "Couldn't change role");
     } finally {
       setBusyId(null);
     }
@@ -126,6 +159,19 @@ const ShareBoardModal = ({ isOpen, onClose, board }) => {
                       {m.title || "Member"}
                     </p>
                   </div>
+
+                  {isOwner ? (
+                    <RoleSelect
+                      value={m.role}
+                      disabled={busyId === m.id}
+                      onChange={(role) => changeRole(m, role)}
+                    />
+                  ) : (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300">
+                      {ROLE_LABEL[m.role] || "Editor"}
+                    </span>
+                  )}
+
                   {(isOwner || m.id === user.id) && (
                     <button
                       onClick={() => remove(m)}
@@ -142,9 +188,16 @@ const ShareBoardModal = ({ isOpen, onClose, board }) => {
 
           {isOwner && (
             <section>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                Add a teammate
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                  Add a teammate
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-gray-400">Add as</span>
+                  <RoleSelect value={newRole} onChange={setNewRole} />
+                </div>
+              </div>
+
               {team.length === 0 ? (
                 <p className="text-sm text-gray-400">
                   You have no teammates yet.{" "}

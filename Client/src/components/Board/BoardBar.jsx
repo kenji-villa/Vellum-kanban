@@ -1,22 +1,34 @@
 import React, { useState } from "react";
-import { FiUserPlus } from "react-icons/fi";
+import { FiUserPlus, FiActivity } from "react-icons/fi";
 import PersonAvatar from "../Team/PersonAvatar";
 import ShareBoardModal from "./ShareBoardModal";
+import BoardActivityModal from "./BoardActivityModal";
 import { useBoardPeople } from "../../hooks/useBoardPeople";
 
 const BoardBar = ({ board }) => {
-  const [open, setOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const people = useBoardPeople(board.id);
-  const isOwner = board.role !== "member";
+  const isOwner = board.role === "owner";
   const shown = people.slice(0, 5);
   const extra = people.length - shown.length;
 
   return (
     <div className="px-8 pt-4 flex items-center justify-end gap-4">
-      {!isOwner && board.owner?.name && (
-        <p className="mr-auto text-xs text-gray-500 dark:text-gray-400">
-          Shared by <span className="font-semibold">{board.owner.name}</span>
-        </p>
+      {!isOwner && (
+        <div className="mr-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          {board.owner?.name && (
+            <span>
+              Shared by{" "}
+              <span className="font-semibold">{board.owner.name}</span>
+            </span>
+          )}
+          {board.role === "viewer" && (
+            <span className="px-2 py-0.5 rounded-full bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-gray-200 font-semibold">
+              View only
+            </span>
+          )}
+        </div>
       )}
 
       <div className="flex -space-x-2">
@@ -33,7 +45,15 @@ const BoardBar = ({ board }) => {
       </div>
 
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => setActivityOpen(true)}
+        className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm"
+      >
+        <FiActivity className="w-4 h-4" />
+        Activity
+      </button>
+
+      <button
+        onClick={() => setShareOpen(true)}
         className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-sm"
       >
         <FiUserPlus className="w-4 h-4" />
@@ -41,9 +61,14 @@ const BoardBar = ({ board }) => {
       </button>
 
       <ShareBoardModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
         board={board}
+      />
+      <BoardActivityModal
+        isOpen={activityOpen}
+        onClose={() => setActivityOpen(false)}
+        boardId={board.id}
       />
     </div>
   );
