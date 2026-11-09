@@ -12,14 +12,16 @@ import { api } from "../utils/api";
 import { useAuth } from "./AuthContext";
 import { useBoard } from "./BoardContext";
 import { isCardDone } from "../utils/listStyle";
+import { isSocketConnected } from "../utils/socket";
 
 const NotificationContext = createContext();
 
 const SEEN_KEY = "vellum_seen_alerts_v1";
 const POLL_MS = 45000;
-const WARN_DAYS_HIGH = 3; // high-priority tasks warn this many days ahead
-const WARN_DAYS_NORMAL = 1; // everything else
+const WARN_DAYS_HIGH = 3;
+const WARN_DAYS_NORMAL = 1;
 
+// Server notification type -> how the bell renders it
 const KINDS = {
   INVITE_RECEIVED: "invite",
   INVITE_ACCEPTED: "accepted",
@@ -28,6 +30,7 @@ const KINDS = {
   TASK_SUBMITTED: "submitted",
   TASK_APPROVED: "approved",
   TASK_CHANGES_REQUESTED: "changes",
+  COMMENT_ADDED: "commented",
 };
 
 const loadSeen = () => {
@@ -55,7 +58,7 @@ const buildDeadlineItems = (boards, meId) => {
         // Finished or waiting on a reviewer: nothing left to warn about
         if (isCardDone(c, l) || c.status === "SUBMITTED") continue;
         // Only tasks that are yours: assigned to you, or unassigned on a board you own
-        const mine = c.assigneeId ? c.assigneeId === meId : b.role !== "member";
+        const mine = c.assigneeId ? c.assigneeId === meId : b.role === "owner";
         if (!mine) continue;
         const days = differenceInCalendarDays(new Date(c.dueDate), today);
         const limit = c.priority === "high" ? WARN_DAYS_HIGH : WARN_DAYS_NORMAL;
@@ -95,7 +98,7 @@ export const NotificationProvider = ({ children }) => {
       setServer(data);
       const top = data.notifications[0]?.id || "";
       // A new notification may mean something changed (a teammate accepted,
-      // a board was shared with you, a task was assigned to you)
+      // a board was shared with you, a task was assigned or reviewed)
       if (lastTopId.current !== null && top !== lastTopId.current) {
         bumpTeam();
         refreshBoards();
@@ -115,7 +118,8 @@ export const NotificationProvider = ({ children }) => {
     }
     refresh();
     const id = setInterval(() => {
-      if (document.visibilityState === "visible") refresh();
+      if (document.visibilityState === "visible" && !isSocketConnected())
+        refresh();
     }, POLL_MS);
     window.addEventListener("focus", refresh);
     return () => {
@@ -149,18 +153,21 @@ export const NotificationProvider = ({ children }) => {
   }, [deadlines, state.loading, state.error]);
 
   const items = useMemo(() => {
-    const serverItems = server.notifications.map((n) => ({
-      key: `n:${n.id}`,
-      id: n.id,
-      kind: KINDS[n.type] || "accepted",
-      unread: !n.readAt,
-      createdAt: n.createdAt,
-      actor: n.actor,
-      invitation: n.invitation,
-      board: n.board,
-      card: n.card,
-      note: n.note,
-    }));
+    const serverItems = server.notifications
+      .map((n) => ({
+        key: `n:${n.id}`,
+        id: n.id,
+        kind: KINDS[n.type], // unknown types stay undefined and are skipped below
+        unread: !n.readAt,
+        createdAt: n.createdAt,
+        actor: n.actor,
+        invitation: n.invitation,
+        board: n.board,
+        card: n.card,
+        note: n.note,
+      }))
+      .filter((i) => i.kind);
+
     const pending = serverItems.filter(
       (i) => i.kind === "invite" && i.invitation?.status === "PENDING",
     );
