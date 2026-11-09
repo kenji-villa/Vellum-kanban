@@ -31,7 +31,7 @@ const TaskWorkflow = ({ card, me, boardRole, people = [], onAction }) => {
   const s = STATUS[status] || STATUS.OPEN;
   const isAssignee = !!card.assigneeId && card.assigneeId === me;
   const canReview =
-    boardRole !== "member" || card.assignedById === me || !card.assigneeId;
+    boardRole === "owner" || card.assignedById === me || !card.assigneeId;
   const assigner = people.find((p) => p.id === card.assignedById);
   const needsReview =
     !!card.assignedById && card.assignedById !== card.assigneeId;

@@ -24,7 +24,7 @@ const UrgentTasks = () => {
             return false;
           return card.assigneeId
             ? card.assigneeId === user?.id
-            : board.role !== "member";
+            : board.role === "owner";
         })
         .map((card) => ({
           ...card,

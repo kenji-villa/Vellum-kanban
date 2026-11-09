@@ -5,6 +5,7 @@ import Modal from "./UI/Modal";
 import { useBoard } from "../context/BoardContext";
 import { useToast } from "../context/ToastContext";
 import { useSettings } from "../context/SettingsContext";
+import { canEditBoard } from "../utils/roles";
 
 const fieldClass =
   "w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]";
@@ -45,6 +46,8 @@ const QuickCreate = () => {
   const hasBoards = state.boards.length > 0;
   const selectedBoard = state.boards.find((b) => b.id === boardId);
   const lists = selectedBoard?.lists ?? [];
+  const editableBoards = state.boards.filter((b) => canEditBoard(b.role));
+  const hasEditableBoards = editableBoards.length > 0;
 
   // Close the menu on outside click or Escape
   useEffect(() => {
@@ -69,7 +72,7 @@ const QuickCreate = () => {
 
   const openTask = () => {
     const board =
-      state.boards.find((b) => b.id === currentBoardId) || state.boards[0];
+      editableBoards.find((b) => b.id === currentBoardId) || editableBoards[0];
     setBoardId(board.id);
     setListId(board.lists[0]?.id || "");
     setPriority(settings.defaultPriority || "medium");
@@ -83,6 +86,20 @@ const QuickCreate = () => {
     setMenuOpen(false);
     setMode("board");
   };
+
+  useEffect(() => {
+    const onNewTask = () => {
+      if (editableBoards.length) openTask();
+      else toast.info("You need a board you can edit first");
+    };
+    const onNewBoard = () => openBoard();
+    window.addEventListener("vellum:new-task", onNewTask);
+    window.addEventListener("vellum:new-board", onNewBoard);
+    return () => {
+      window.removeEventListener("vellum:new-task", onNewTask);
+      window.removeEventListener("vellum:new-board", onNewBoard);
+    };
+  });
 
   // No boards: skip the menu, a task has nowhere to go
   const handleClick = () => {
@@ -165,11 +182,13 @@ const QuickCreate = () => {
             role="menu"
             className="absolute left-full top-0 ml-3 w-52 z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 p-1.5"
           >
-            <MenuItem
-              title="New task"
-              hint="Add a card to a list"
-              onClick={openTask}
-            />
+            {hasEditableBoards && (
+              <MenuItem
+                title="New task"
+                hint="Add a card to a list"
+                onClick={openTask}
+              />
+            )}
             <MenuItem
               title="New board"
               hint="Start a fresh workspace"
@@ -203,7 +222,7 @@ const QuickCreate = () => {
                   onChange={(e) => handleBoardChange(e.target.value)}
                   className={fieldClass}
                 >
-                  {state.boards.map((b) => (
+                  {editableBoards.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.title}
                     </option>

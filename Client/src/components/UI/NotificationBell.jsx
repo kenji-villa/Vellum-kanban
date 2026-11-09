@@ -11,13 +11,39 @@ const TABS = [
   { id: "deadlines", label: "Deadlines" },
 ];
 
+// Notifications that open a board when clicked
 const ACTIVITY_KINDS = new Set([
   "shared",
   "assigned",
   "submitted",
   "approved",
   "changes",
+  "commented",
 ]);
+
+const ACTIVITY_TEXT = {
+  shared: (i) => ({
+    verb: "shared the board ",
+    subject: i.board?.title,
+    tail: " with you",
+  }),
+  assigned: (i) => ({ verb: "assigned you ", subject: i.card?.title }),
+  submitted: (i) => ({
+    verb: "submitted ",
+    subject: i.card?.title,
+    tail: " for review",
+  }),
+  approved: (i) => ({
+    verb: "marked ",
+    subject: i.card?.title,
+    tail: " as done ✓",
+  }),
+  changes: (i) => ({
+    verb: "requested changes on ",
+    subject: i.card?.title,
+  }),
+  commented: (i) => ({ verb: "commented on ", subject: i.card?.title }),
+};
 
 const dueLabel = (days) => {
   if (days < 0) return `Overdue by ${-days} day${days < -1 ? "s" : ""}`;
@@ -171,26 +197,6 @@ const AcceptedItem = ({ item, onOpen }) => (
   </li>
 );
 
-const ACTIVITY_TEXT = {
-  shared: (i) => ({
-    verb: "shared the board ",
-    subject: i.board?.title,
-    tail: " with you",
-  }),
-  assigned: (i) => ({ verb: "assigned you ", subject: i.card?.title }),
-  submitted: (i) => ({
-    verb: "submitted ",
-    subject: i.card?.title,
-    tail: " for review",
-  }),
-  approved: (i) => ({
-    verb: "marked ",
-    subject: i.card?.title,
-    tail: " as done ✓",
-  }),
-  changes: (i) => ({ verb: "requested changes on ", subject: i.card?.title }),
-};
-
 const ActivityItem = ({ item, onOpen }) => {
   const t = ACTIVITY_TEXT[item.kind](item);
   return (
@@ -288,6 +294,25 @@ const NotificationBell = () => {
     }
   };
 
+  const renderItem = (item) => {
+    if (item.kind === "deadline")
+      return <DeadlineItem key={item.key} item={item} onOpen={handleOpen} />;
+    if (item.kind === "invite")
+      return (
+        <InviteItem
+          key={item.key}
+          item={item}
+          onRespond={handleRespond}
+          busy={busyKey === item.key}
+        />
+      );
+    if (ACTIVITY_KINDS.has(item.kind))
+      return <ActivityItem key={item.key} item={item} onOpen={handleOpen} />;
+    if (item.kind === "accepted")
+      return <AcceptedItem key={item.key} item={item} onOpen={handleOpen} />;
+    return null;
+  };
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -380,40 +405,13 @@ const NotificationBell = () => {
                   You're all caught up
                 </p>
                 <p className="text-[11px] text-gray-400 mt-1">
-                  Invitations, assignments and deadline alerts will show up
-                  here.
+                  Invitations, assignments, reviews and deadline alerts will
+                  show up here.
                 </p>
               </div>
             ) : (
               <ul className="divide-y divide-gray-100 dark:divide-slate-700">
-                {visible.map((item) =>
-                  item.kind === "deadline" ? (
-                    <DeadlineItem
-                      key={item.key}
-                      item={item}
-                      onOpen={handleOpen}
-                    />
-                  ) : item.kind === "invite" ? (
-                    <InviteItem
-                      key={item.key}
-                      item={item}
-                      onRespond={handleRespond}
-                      busy={busyKey === item.key}
-                    />
-                  ) : item.kind === "shared" || item.kind === "assigned" ? (
-                    <ActivityItem
-                      key={item.key}
-                      item={item}
-                      onOpen={handleOpen}
-                    />
-                  ) : (
-                    <AcceptedItem
-                      key={item.key}
-                      item={item}
-                      onOpen={handleOpen}
-                    />
-                  ),
-                )}
+                {visible.map(renderItem)}
               </ul>
             )}
           </div>

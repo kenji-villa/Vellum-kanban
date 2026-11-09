@@ -22,7 +22,7 @@ const BoardCard = ({ board }) => {
   const inputRef = useRef(null);
 
   const { user } = useAuth();
-  const isOwner = board.role !== "member";
+  const isOwner = board.role === "owner";
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -17,6 +17,7 @@ import TaskCard from "../Card/TaskCard";
 import FilterBar from "./FilterBar";
 import { useBoard } from "../../context/BoardContext";
 import { filterBoard, emptyFilters } from "../../utils/filters";
+import { canEditBoard } from "../../utils/roles";
 
 const Board = ({ board }) => {
   const { createList, reorderLists, moveCard, pauseSync } = useBoard();
@@ -24,6 +25,7 @@ const Board = ({ board }) => {
   const [newListTitle, setNewListTitle] = useState("");
   const [activeItem, setActiveItem] = useState(null);
   const toast = useToast();
+  const canEdit = canEditBoard(board.role);
 
   // ---- Search & Filter state (view-only, not persisted) ----
   const [query, setQuery] = useState("");
@@ -197,7 +199,7 @@ const Board = ({ board }) => {
       )}
 
       <DndContext
-        sensors={sensors}
+        sensors={canEdit ? sensors : []}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -222,52 +224,58 @@ const Board = ({ board }) => {
           </SortableContext>
 
           {/* Add List */}
-          <div className="min-w-[280px] max-w-[320px] flex flex-col">
-            {addingList ? (
-              <div className="bg-white rounded-xl p-3 shadow-sm">
-                <input
-                  type="text"
-                  value={newListTitle}
-                  onChange={(e) => setNewListTitle(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddList()}
-                  placeholder="List title..."
-                  autoFocus
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleAddList}
-                    className="flex-1 bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
-                  >
-                    Add
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAddingList(false);
-                      setNewListTitle("");
-                    }}
-                    className="flex-1 bg-gray-100 text-gray-700 text-sm py-1.5 rounded-lg hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
+          {canEdit && (
+            <div className="min-w-[280px] max-w-[320px] flex flex-col">
+              {addingList ? (
+                <div className="bg-white rounded-xl p-3 shadow-sm">
+                  <input
+                    type="text"
+                    value={newListTitle}
+                    onChange={(e) => setNewListTitle(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddList()}
+                    placeholder="List title..."
+                    autoFocus
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleAddList}
+                      className="flex-1 bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAddingList(false);
+                        setNewListTitle("");
+                      }}
+                      className="flex-1 bg-gray-100 text-gray-700 text-sm py-1.5 rounded-lg hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setAddingList(true)}
-                className="bg-white/60 hover:bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors w-full"
-              >
-                + Add List
-              </button>
-            )}
-          </div>
+              ) : (
+                <button
+                  onClick={() => setAddingList(true)}
+                  className="bg-white/60 hover:bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors w-full"
+                >
+                  + Add List
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* DragOverlay */}
         <DragOverlay>
           {activeItem?.type === "card" && activeItem.data ? (
             <div className="rotate-3 cursor-grabbing">
-              <TaskCard card={activeItem.data} onClick={() => {}} />
+              <TaskCard
+                card={activeItem.data}
+                onClick={() => {}}
+                boardLabels={board.labels}
+              />
             </div>
           ) : activeItem?.type === "column" && activeItem.data ? (
             <div className="rotate-2 cursor-grabbing w-[280px]">

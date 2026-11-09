@@ -5,6 +5,7 @@ import { useDroppable } from "@dnd-kit/core";
 import ListIcon from "./ListIcon";
 import { getListMeta } from "../../utils/listStyle";
 import { useBoardPeople } from "../../hooks/useBoardPeople";
+import { canEditBoard } from "../../utils/roles";
 
 import {
   SortableContext,
@@ -28,6 +29,8 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
     pauseSync,
     state,
     transitionCard,
+    addLabel,
+    removeLabel,
   } = useBoard();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
@@ -38,7 +41,10 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { user } = useAuth();
-  const boardRole = state.boards.find((b) => b.id === boardId)?.role;
+  const board = state.boards.find((b) => b.id === boardId);
+  const boardRole = board?.role;
+  const canEdit = canEditBoard(boardRole);
+  const boardLabels = board?.labels || [];
 
   const meta = getListMeta(list.title, index);
   const menuRef = useRef(null);
@@ -211,47 +217,48 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
           <span className="text-[11px] font-medium bg-white/10 text-white/80 px-2 py-0.5 rounded-full">
             {list.cards.length}
           </span>
-
-          <div
-            ref={menuRef}
-            className="ml-auto relative flex items-center gap-1"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={handleOpenCreate}
-              title="Add task"
-              className="w-7 h-7 rounded-lg text-white/70 hover:text-white hover:bg-white/10 text-lg leading-none"
+          {canEdit && (
+            <div
+              ref={menuRef}
+              className="ml-auto relative flex items-center gap-1"
+              onPointerDown={(e) => e.stopPropagation()}
             >
-              +
-            </button>
-            <button
-              onClick={() => setListMenuOpen((v) => !v)}
-              title="List options"
-              className="w-7 h-7 rounded-lg text-white/70 hover:text-white hover:bg-white/10 text-lg leading-none"
-            >
-              ⋯
-            </button>
+              <button
+                onClick={handleOpenCreate}
+                title="Add task"
+                className="w-7 h-7 rounded-lg text-white/70 hover:text-white hover:bg-white/10 text-lg leading-none"
+              >
+                +
+              </button>
+              <button
+                onClick={() => setListMenuOpen((v) => !v)}
+                title="List options"
+                className="w-7 h-7 rounded-lg text-white/70 hover:text-white hover:bg-white/10 text-lg leading-none"
+              >
+                ⋯
+              </button>
 
-            {listMenuOpen && (
-              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-100 dark:border-slate-700 py-1 w-36 z-20">
-                <button
-                  onClick={() => {
-                    setRenaming(true);
-                    setListMenuOpen(false);
-                  }}
-                  className="block w-full text-left text-sm text-gray-700 dark:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-700"
-                >
-                  Rename
-                </button>
-                <button
-                  onClick={handleDeleteList}
-                  className="block w-full text-left text-sm text-red-600 px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/30"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
+              {listMenuOpen && (
+                <div className="absolute top-full right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-100 dark:border-slate-700 py-1 w-36 z-20">
+                  <button
+                    onClick={() => {
+                      setRenaming(true);
+                      setListMenuOpen(false);
+                    }}
+                    className="block w-full text-left text-sm text-gray-700 dark:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-700"
+                  >
+                    Rename
+                  </button>
+                  <button
+                    onClick={handleDeleteList}
+                    className="block w-full text-left text-sm text-red-600 px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/30"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Cards Droppable Area */}
@@ -273,6 +280,7 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
                 card={card}
                 people={people}
                 onClick={() => handleOpenEdit(card)}
+                boardLabels={boardLabels}
               />
             ))}
           </SortableContext>
@@ -298,6 +306,12 @@ const BoardColumn = ({ boardId, list, index = 0 }) => {
         me={user?.id}
         boardRole={boardRole}
         onTransition={handleTransition}
+        boardLabels={boardLabels}
+        onCreateLabel={(name, color) => addLabel(boardId, name, color)}
+        onDeleteLabel={(label) => removeLabel(boardId, label)}
+        boardId={boardId}
+        listId={list.id}
+        readOnly={!canEdit}
       />
       <ConfirmDialog
         isOpen={confirmOpen}
