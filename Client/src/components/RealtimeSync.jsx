@@ -5,7 +5,6 @@ import { useNotifications } from "../context/NotificationContext";
 import { getToken } from "../utils/api";
 import { connectSocket, disconnectSocket } from "../utils/socket";
 
-// Connects the socket while you're logged in and turns server signals into refreshes
 const RealtimeSync = () => {
   const { isAuthenticated } = useAuth();
   const { refreshBoard, refreshBoards } = useBoard();
