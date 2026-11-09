@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { api } from "../utils/api";
 import { useAuth } from "./AuthContext";
+import { isSocketConnected } from "../utils/socket";
 
 const BoardContext = createContext();
 
@@ -212,6 +213,37 @@ const reducer = (state, action) => {
       };
     }
 
+    case "LABEL_ADDED":
+      return {
+        ...state,
+        boards: state.boards.map((b) =>
+          b.id === action.payload.boardId
+            ? { ...b, labels: [...(b.labels || []), action.payload.label] }
+            : b,
+        ),
+      };
+
+    case "LABEL_DELETED": {
+      const { boardId, labelId, name } = action.payload;
+      return {
+        ...state,
+        boards: state.boards.map((b) =>
+          b.id !== boardId
+            ? b
+            : {
+                ...b,
+                labels: (b.labels || []).filter((l) => l.id !== labelId),
+                lists: b.lists.map((l) => ({
+                  ...l,
+                  cards: l.cards.map((c) => ({
+                    ...c,
+                    labels: (c.labels || []).filter((x) => x !== name),
+                  })),
+                })),
+              },
+        ),
+      };
+    }
     case "RESET":
       return initialState;
 
@@ -225,16 +257,25 @@ const reducer = (state, action) => {
 // ------------------------------------------------------------
 export const BoardProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const { isAuthenticated } = useAuth();
   const optimisticRef = useRef(new Map());
   const syncPausedRef = useRef(false);
-  const pauseSync = useCallback((paused) => {
-    syncPausedRef.current = paused;
-  }, []);
+  const dirtyRef = useRef(new Set());
+  const timersRef = useRef(new Map());
 
   // ------------------------------------------------------------------
   // 1. reloadBoards — MUST be defined first so others can reference it
   // ------------------------------------------------------------------
+
+  const fetchAllBoards = async () => {
+    const { boards } = await api.listBoards();
+    return Promise.all(
+      boards.map(async (b) => (await api.getBoard(b.id)).board),
+    );
+  };
+
   const reloadBoards = useCallback(async () => {
     dispatch({ type: "SET_LOADING", payload: true });
     try {
@@ -252,32 +293,96 @@ export const BoardProvider = ({ children }) => {
   }, []);
 
   const refreshBoards = useCallback(async () => {
-    if (syncPausedRef.current) return;
+    if (syncPausedRef.current) {
+      dirtyRef.current.add("__all__");
+      return;
+    }
     try {
-      const { boards } = await api.listBoards();
-      const fullBoards = await Promise.all(
-        boards.map(async (b) => (await api.getBoard(b.id)).board),
-      );
-      if (syncPausedRef.current) return;
+      const fullBoards = await fetchAllBoards();
+      if (syncPausedRef.current) {
+        dirtyRef.current.add("__all__");
+        return;
+      }
       dispatch({ type: "SET_BOARDS", payload: fullBoards });
     } catch {
       /* keep current data */
     }
   }, []);
 
-  // Load boards when authenticated
+  // Reload just one board (a teammate changed it)
+  const refreshBoard = useCallback(
+    (boardId) => {
+      if (syncPausedRef.current) {
+        dirtyRef.current.add(boardId);
+        return;
+      }
+      clearTimeout(timersRef.current.get(boardId)); // merge bursts of changes
+      timersRef.current.set(
+        boardId,
+        setTimeout(async () => {
+          try {
+            const { board } = await api.getBoard(boardId);
+            if (syncPausedRef.current) {
+              dirtyRef.current.add(boardId);
+              return;
+            }
+            const current = stateRef.current.boards;
+            const exists = current.some((b) => b.id === boardId);
+            dispatch({
+              type: "SET_BOARDS",
+              payload: exists
+                ? current.map((b) => (b.id === boardId ? board : b))
+                : [...current, board],
+            });
+          } catch (err) {
+            // Deleted, or we lost access: reload the whole list
+            if (err.status === 403 || err.status === 404) refreshBoards();
+          }
+        }, 150),
+      );
+    },
+    [refreshBoards],
+  );
+
+  // Pause while dragging or editing; catch up as soon as you're done
+  const pauseSync = useCallback(
+    (paused) => {
+      syncPausedRef.current = paused;
+      if (!paused && dirtyRef.current.size) {
+        const ids = [...dirtyRef.current];
+        dirtyRef.current.clear();
+        if (ids.includes("__all__")) refreshBoards();
+        else ids.forEach((id) => refreshBoard(id));
+      }
+    },
+    [refreshBoard, refreshBoards],
+  );
+
+  // Load boards after login, clear them on logout
   useEffect(() => {
-    if (!isAuthenticated) return;
-    const tick = () => {
-      if (document.visibilityState === "visible") refreshBoards();
-    };
-    const id = setInterval(tick, 60000);
-    window.addEventListener("focus", tick);
+    if (!isAuthenticated) {
+      dispatch({ type: "RESET" });
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      dispatch({ type: "SET_LOADING", payload: true });
+      try {
+        const boards = await fetchAllBoards();
+        if (!cancelled) dispatch({ type: "SET_BOARDS", payload: boards });
+      } catch (err) {
+        if (!cancelled) {
+          dispatch({
+            type: "SET_ERROR",
+            payload: err.message || "Failed to load boards",
+          });
+        }
+      }
+    })();
     return () => {
-      clearInterval(id);
-      window.removeEventListener("focus", tick);
+      cancelled = true;
     };
-  }, [isAuthenticated, refreshBoards]);
+  }, [isAuthenticated]);
 
   // ------------------------------------------------------------
   // Public actions — optimistic, with rollback on failure
@@ -450,6 +555,28 @@ export const BoardProvider = ({ children }) => {
     [],
   );
 
+  const addLabel = useCallback(async (boardId, name, color) => {
+    const { label } = await api.createLabel(boardId, name, color);
+    dispatch({ type: "LABEL_ADDED", payload: { boardId, label } });
+    return label;
+  }, []);
+
+  const removeLabel = useCallback(async (boardId, label) => {
+    await api.deleteLabel(boardId, label.id);
+    dispatch({
+      type: "LABEL_DELETED",
+      payload: { boardId, labelId: label.id, name: label.name },
+    });
+  }, []);
+
+  // Update a card in local state only (no API call)
+  const patchCardLocal = useCallback((boardId, listId, cardId, updates) => {
+    dispatch({
+      type: "UPDATE_CARD",
+      payload: { boardId, listId, cardId, updates },
+    });
+  }, []);
+
   return (
     <BoardContext.Provider
       value={{
@@ -467,9 +594,13 @@ export const BoardProvider = ({ children }) => {
         deleteCard,
         moveCard,
         transitionCard,
+        addLabel,
+        removeLabel,
         reloadBoards,
         refreshBoards,
+        refreshBoard,
         pauseSync,
+        patchCardLocal,
       }}
     >
       {children}
