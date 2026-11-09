@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useSettings } from "../../context/SettingsContext";
 import { useBoard } from "../../context/BoardContext";
 import { isCardDone } from "../../utils/listStyle";
+import SearchBar from "../SearchBar";
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -117,11 +118,12 @@ const DashboardTopbar = () => {
             />
           </svg>
         </span>
-        <input
-          type="text"
-          placeholder="Search projects, tasks, or people..."
-          className="w-full bg-white dark:bg-slate-800 dark:text-gray-100 rounded-2xl pl-11 pr-4 py-3 text-sm placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-        />
+        <div
+          className="animate-rise relative z-20"
+          style={{ animationDelay: "80ms" }}
+        >
+          <SearchBar />
+        </div>
       </div>
     </div>
   );

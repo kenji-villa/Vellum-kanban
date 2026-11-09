@@ -93,6 +93,7 @@ const FilterBar = ({
             </svg>
           </span>
           <input
+            data-shortcut-search
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
