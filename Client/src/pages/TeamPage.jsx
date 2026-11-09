@@ -78,7 +78,7 @@ const TeamPage = () => {
     "px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-60";
 
   return (
-    <div className="flex min-h-screen app-bg">
+    <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 p-8 overflow-y-auto">
         {/* Hero */}
