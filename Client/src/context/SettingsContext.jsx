@@ -16,6 +16,7 @@ const defaultSettings = {
   defaultPriority: "medium",
   defaultLabels: [],
   compactMode: false,
+  shortcutsEnabled: true,
 };
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState(() => {
