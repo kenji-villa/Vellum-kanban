@@ -4,6 +4,7 @@ import { useSettings } from "../context/SettingsContext";
 import { useAuth } from "../context/AuthContext";
 import QuickCreate from "./QuickCreate";
 import NotificationBell from "./UI/NotificationBell";
+import { useBoard } from "../context/BoardContext";
 
 const iconClass = "w-5 h-5";
 
@@ -12,6 +13,20 @@ const Sidebar = () => {
   const { settings, updateSetting } = useSettings();
   const { logout } = useAuth();
   const { pathname } = useLocation();
+
+  const { state } = useBoard();
+  const lastBoardId = (() => {
+    try {
+      return localStorage.getItem("vellum_last_board");
+    } catch {
+      return null;
+    }
+  })();
+  const projectsTarget =
+    state.boards.find((b) => b.id === lastBoardId) || state.boards[0];
+  const projectsPath = projectsTarget
+    ? `/board/${projectsTarget.id}`
+    : "/projects";
 
   const navItems = [
     {
@@ -51,7 +66,7 @@ const Sidebar = () => {
     },
     {
       name: "Projects",
-      path: "/projects",
+      path: projectsPath,
       matchPattern: /^\/(board|projects)(\/|$)/,
       icon: (
         <svg
