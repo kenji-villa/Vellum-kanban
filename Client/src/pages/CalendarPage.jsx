@@ -79,7 +79,7 @@ const CalendarPage = () => {
   const openEvent = (evt) => navigate(`/board/${evt.boardId}`);
 
   return (
-    <div className="flex min-h-screen app-bg">
+    <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col p-8 overflow-hidden">
         {/* Top bar */}
