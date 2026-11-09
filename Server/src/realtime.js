@@ -62,3 +62,8 @@ export const leaveUserFromBoard = (userId, boardId) => {
 export const closeBoardRoom = (boardId) => {
   io?.in(`board:${boardId}`).socketsLeave(`board:${boardId}`);
 };
+
+// Close every open connection of a user (used when an account is deleted)
+export const disconnectUser = (userId) => {
+  io?.in(`user:${userId}`).disconnectSockets(true);
+};

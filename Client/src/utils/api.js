@@ -141,7 +141,9 @@ export const api = {
   markAllNotificationsRead: () => request("/notifications/read-all", { method: "POST" }),
 
   //Profile------------------------
-
+  deleteAccount: (confirmEmail) =>
+    request("/users/me", { method: "DELETE", body: { confirmEmail } }),
+  
   updateProfile: (payload) => request("/users/me", { method: "PATCH", body: payload }),
   
   uploadBanner: async (file) => {

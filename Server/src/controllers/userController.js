@@ -1,5 +1,13 @@
 import prisma from "../prisma.js";
 import { sanitizeUser } from "../utils/sanitizeUser.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+import { leaveUserFromBoard, emitToUser, disconnectUser } from "../realtime.js";
+
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const UPLOADS_DIR = path.join(__dirname, "../../uploads");
 
 const str = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : undefined);
 
@@ -30,6 +38,14 @@ const cleanLinks = (obj) => {
   return out;
 };
 
+const removeUpload = async (publicPath) => {
+  if (!publicPath) return;
+  try {
+    await fs.unlink(path.join(UPLOADS_DIR, path.basename(publicPath)));
+  } catch {
+    /* already gone */
+  }
+};
 
 // PATCH /api/users/me
 export const updateMe = async (req, res) => {
@@ -119,5 +135,54 @@ export const uploadAvatar = async (req, res) => {
   } catch (err) {
     console.error("uploadAvatar FAILED:", err);
     res.status(500).json({ message: err.message || "Something went wrong" });
+  }
+};
+
+// DELETE /api/users/me  { confirmEmail }
+export const deleteMe = async (req, res) => {
+  try {
+    const me = req.user.id;
+    const user = await prisma.user.findUnique({ where: { id: me } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const typed = String(req.body?.confirmEmail || "").trim().toLowerCase();
+    if (typed !== user.email.toLowerCase()) {
+      return res.status(400).json({ message: "That email doesn't match your account" });
+    }
+
+    // Remember who loses access to your boards, and who your teammates are
+    const [shared, teammates] = await Promise.all([
+      prisma.boardMember.findMany({
+        where: { board: { userId: me } },
+        select: { userId: true, boardId: true },
+      }),
+      prisma.invitation.findMany({
+        where: { status: "ACCEPTED", OR: [{ senderId: me }, { receiverId: me }] },
+        select: { senderId: true, receiverId: true },
+      }),
+    ]);
+
+    await prisma.$transaction([
+      prisma.board.deleteMany({ where: { userId: me } }),
+      prisma.user.delete({ where: { id: me } }),
+    ]);
+
+    await removeUpload(user.bannerUrl);
+    await removeUpload(user.avatarUrl);
+
+    // Tell other people's open tabs to refresh
+    shared.forEach((m) => {
+      leaveUserFromBoard(m.userId, m.boardId);
+      emitToUser(m.userId, "boards:changed");
+    });
+    teammates.forEach((t) =>
+      emitToUser(t.senderId === me ? t.receiverId : t.senderId, "boards:changed"),
+    );
+    disconnectUser(me);
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("deleteMe error:", err);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
