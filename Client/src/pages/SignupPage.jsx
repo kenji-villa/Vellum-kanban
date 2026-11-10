@@ -182,19 +182,19 @@ const SignupPage = () => {
             />
             <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
               I agree to the{" "}
-              <a
-                href="#"
+              <Link
+                to="/terms"
                 className="text-orange-500 hover:underline font-medium"
               >
                 Terms of Service
-              </a>{" "}
+              </Link>{" "}
               and{" "}
-              <a
-                href="#"
+              <Link
+                to="/privacy"
                 className="text-orange-500 hover:underline font-medium"
               >
                 Privacy Policy
-              </a>
+              </Link>
             </span>
           </label>
           {errors.agree && (
