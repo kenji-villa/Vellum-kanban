@@ -299,3 +299,107 @@
     transform: none;
   }
 }
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-enter {
+  animation: page-enter 0.28s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   Landing page
+   ========================================================= */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* so anchors don't hide under the fixed nav */
+}
+
+/* Infinite marquee: the list is rendered twice, so -50% loops seamlessly */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 50s linear infinite;
+}
+.marquee-reverse {
+  animation-direction: reverse;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.mask-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+/* A card hopping one column to the right (used by the live-sync visual) */
+@keyframes hop {
+  0%,
+  30% {
+    transform: translateX(0);
+  }
+  45%,
+  85% {
+    transform: translateX(calc(100% + 0.75rem));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+.animate-hop {
+  animation: hop 6s ease-in-out infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+.animate-caret {
+  animation: caret 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .marquee-track,
+  .animate-hop,
+  .animate-caret {
+    animation: none;
+  }
+}
