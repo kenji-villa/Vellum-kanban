@@ -1,169 +1,291 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { FiCalendar, FiMessageSquare, FiArrowRight } from "react-icons/fi";
+import { LABEL_COLORS } from "../../utils/labels";
 
-const LandingHero = () => {
-  return (
-    <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-32">
-      {/* Background grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, #1e2757 1px, transparent 1px), linear-gradient(to bottom, #1e2757 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-      {/* Gradient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/10 blur-[120px] rounded-full" />
-
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8 text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 mb-8 animate-fade-up delay-100">
-          <span className="bg-[#1e2757] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-            NEW
-          </span>
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            Built for teams that ship fast
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-[1.05] animate-blur-reveal delay-200">
-          Your daily tasks,
-          <br />
-          <span className="bg-gradient-to-r from-[#1e2757] via-orange-500 to-[#1e2757] bg-clip-text text-transparent dark:from-orange-400 dark:via-orange-300 dark:to-orange-400">
-            organized effortlessly.
-          </span>
-        </h1>
-
-        {/* Subtext */}
-        <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed animate-fade-up delay-300">
-          Vellum helps you manage daily tasks, assign teammates, and track
-          progress — all in a simple, fast, and visual workspace. No accounts,
-          no servers, all local.
-        </p>
-
-        {/* CTAs */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up delay-400">
-          <Link
-            to="/signup"
-            className="bg-[#1e2757] hover:bg-[#151c45] text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors shadow-lg shadow-[#1e2757]/20"
-          >
-            Get Started — Free
-          </Link>
-          <a
-            href="#preview"
-            className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200 text-sm font-medium px-6 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-          >
-            View Demo
-          </a>
-        </div>
-
-        {/* Product Preview Mock */}
-        <div className="mt-16 lg:mt-20 relative animate-fade-up delay-500">
-          <div className="relative mx-auto max-w-5xl">
-            {/* Floating notification card */}
-            <div className="hidden lg:block absolute -top-6 -right-10 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-4 text-left rotate-3">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500" />
-                <span className="text-[11px] text-gray-500">Today</span>
-              </div>
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                Redesign Dashboard
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Refine header with minimal layout, icon buttons...
-              </p>
-              <div className="flex gap-1 mt-3">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                  UI/UX
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                  Design
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                  High
-                </span>
-              </div>
-            </div>
-
-            {/* Main Preview Card */}
-            <div className="rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-              {/* Fake browser bar */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700">
-                <div className="flex gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-red-400" />
-                  <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                  <span className="w-3 h-3 rounded-full bg-green-400" />
-                </div>
-                <div className="flex-1 mx-4">
-                  <div className="bg-white dark:bg-slate-800 rounded-md px-3 py-1 text-[11px] text-gray-400 text-center">
-                    vellum.app/dashboard
-                  </div>
-                </div>
-              </div>
-
-              {/* Fake dashboard */}
-              <div className="flex">
-                <div className="w-16 bg-[#1e2757] p-3 flex flex-col gap-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-10 h-10 rounded-lg ${
-                        i === 1 ? "bg-orange-500" : "bg-white/10"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <div className="flex-1 p-5 bg-gray-50 dark:bg-slate-900">
-                  <div className="h-6 w-48 bg-gray-200 dark:bg-slate-700 rounded mb-4" />
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-20 bg-white dark:bg-slate-800 rounded-lg shadow-sm"
-                      />
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-32 bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3"
-                      >
-                        <div className="h-2 w-16 bg-gray-200 dark:bg-slate-700 rounded mb-3" />
-                        <div className="space-y-2">
-                          <div className="h-8 bg-orange-50 dark:bg-orange-900/20 rounded" />
-                          <div className="h-8 bg-gray-100 dark:bg-slate-700 rounded" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats row */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-fade-up delay-500">
-          <Stat value="100%" label="Local-first" />
-          <Stat value="0 ms" label="Setup time" />
-          <Stat value="∞" label="Boards & cards" />
-          <Stat value="3" label="Views built-in" />
-        </div>
-      </div>
-    </section>
-  );
+const DOT = {
+  high: "bg-red-500",
+  medium: "bg-yellow-400",
+  low: "bg-green-500",
 };
 
-const Stat = ({ value, label }) => (
-  <div className="text-center">
-    <p className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-      {value}
+// Sample tasks (clearly demo content)
+const ROW_1 = [
+  {
+    p: "high",
+    label: "Bug",
+    color: "red",
+    title: "Fix the checkout crash",
+    due: "Today",
+    who: "AM",
+    bg: "bg-sky-500",
+    c: 3,
+  },
+  {
+    p: "medium",
+    label: "Design",
+    color: "pink",
+    title: "New onboarding screens",
+    due: "Fri",
+    who: "SK",
+    bg: "bg-violet-500",
+    c: 5,
+  },
+  {
+    p: "low",
+    label: "Research",
+    color: "orange",
+    title: "Interview three customers",
+    due: "Next week",
+    who: "DT",
+    bg: "bg-teal-500",
+    c: 1,
+  },
+  {
+    p: "high",
+    label: "Development",
+    color: "blue",
+    title: "Ship the API rate limiter",
+    due: "Tomorrow",
+    who: "LB",
+    bg: "bg-rose-500",
+    c: 8,
+  },
+  {
+    p: "medium",
+    label: "Marketing",
+    color: "yellow",
+    title: "Plan the launch email",
+    due: "Mon",
+    who: "NG",
+    bg: "bg-amber-500",
+    c: 2,
+  },
+  {
+    p: "low",
+    label: "UI",
+    color: "purple",
+    title: "Polish the empty states",
+    due: "Thu",
+    who: "RT",
+    bg: "bg-indigo-500",
+    c: 0,
+  },
+];
+const ROW_2 = [
+  {
+    p: "medium",
+    label: "Development",
+    color: "blue",
+    title: "Migrate the database",
+    due: "Wed",
+    who: "TH",
+    bg: "bg-emerald-500",
+    c: 4,
+  },
+  {
+    p: "high",
+    label: "Bug",
+    color: "red",
+    title: "Notifications arrive twice",
+    due: "Today",
+    who: "AM",
+    bg: "bg-sky-500",
+    c: 6,
+  },
+  {
+    p: "low",
+    label: "System",
+    color: "gray",
+    title: "Rotate the API keys",
+    due: "Sun",
+    who: "KY",
+    bg: "bg-pink-500",
+    c: 1,
+  },
+  {
+    p: "medium",
+    label: "Design",
+    color: "pink",
+    title: "Icon set for the sidebar",
+    due: "Tue",
+    who: "SK",
+    bg: "bg-violet-500",
+    c: 3,
+  },
+  {
+    p: "high",
+    label: "Research",
+    color: "orange",
+    title: "Compare pricing models",
+    due: "Tomorrow",
+    who: "DT",
+    bg: "bg-teal-500",
+    c: 7,
+  },
+  {
+    p: "low",
+    label: "Marketing",
+    color: "yellow",
+    title: "Collect launch feedback",
+    due: "Next week",
+    who: "NG",
+    bg: "bg-amber-500",
+    c: 2,
+  },
+];
+
+const TaskChip = ({ t }) => (
+  <div className="w-64 shrink-0 mr-4 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-sm p-4 text-left">
+    <div className="flex items-center gap-2 mb-2">
+      <span className={`w-2 h-2 rounded-full ${DOT[t.p]}`} />
+      <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+        {t.p}
+      </span>
+      <span
+        className={`ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full ${LABEL_COLORS[t.color].pill}`}
+      >
+        {t.label}
+      </span>
+    </div>
+    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+      {t.title}
     </p>
-    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{label}</p>
+    <div className="flex items-center justify-between mt-3 text-[11px] text-gray-400">
+      <span className="inline-flex items-center gap-1">
+        <FiCalendar className="w-3 h-3" /> {t.due}
+      </span>
+      <span className="inline-flex items-center gap-3">
+        <span className="inline-flex items-center gap-1">
+          <FiMessageSquare className="w-3 h-3" /> {t.c}
+        </span>
+        <span
+          className={`w-6 h-6 rounded-full text-white text-[10px] font-bold flex items-center justify-center ${t.bg}`}
+        >
+          {t.who}
+        </span>
+      </span>
+    </div>
   </div>
+);
+
+const Marquee = ({ items, reverse = false, duration = 50 }) => (
+  <div className="marquee mask-fade-x overflow-hidden">
+    <div
+      className={`marquee-track ${reverse ? "marquee-reverse" : ""}`}
+      style={{ animationDuration: `${duration}s` }}
+    >
+      {[...items, ...items].map((t, i) => (
+        <TaskChip key={i} t={t} />
+      ))}
+    </div>
+  </div>
+);
+
+const LandingHero = () => (
+  <section className="relative overflow-hidden pt-32 pb-24 lg:pt-40">
+    {/* Backdrop: dots, glows and a soft wave */}
+    <div
+      className="absolute inset-0 opacity-60 dark:opacity-30 pointer-events-none"
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(30,39,87,0.18) 1px, transparent 1.4px)",
+        backgroundSize: "26px 26px",
+        WebkitMaskImage: "linear-gradient(to bottom, #000, transparent 75%)",
+        maskImage: "linear-gradient(to bottom, #000, transparent 75%)",
+      }}
+    />
+    <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[900px] h-[420px] bg-[var(--accent)]/15 blur-[120px] rounded-full pointer-events-none" />
+    <div className="absolute top-40 -left-32 w-[420px] h-[420px] bg-indigo-500/10 blur-[110px] rounded-full pointer-events-none" />
+    <svg
+      className="absolute inset-x-0 bottom-0 w-full h-72 pointer-events-none"
+      viewBox="0 0 1440 320"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="heroWave" x1="0" x2="1">
+          <stop offset="0%" stopColor="#1e2757" stopOpacity="0.1" />
+          <stop offset="50%" stopColor="#f97316" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="#6366f1" stopOpacity="0.12" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#heroWave)"
+        d="M0,192 C240,96 480,288 720,200 C960,112 1200,240 1440,150 L1440,320 L0,320 Z"
+      />
+    </svg>
+
+    <div className="relative max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      {/* Announcement pill */}
+      <a
+        href="#features"
+        className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white/80 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 shadow-sm mb-8 animate-fade-up delay-100 hover:shadow-md transition-shadow"
+      >
+        <span className="bg-[var(--accent)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+          NEW
+        </span>
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+          Live sync, reviews and comments are here
+        </span>
+        <FiArrowRight className="w-3 h-3 text-gray-400" />
+      </a>
+
+      <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-[1.05] animate-blur-reveal delay-200">
+        Plan together.
+        <br />
+        <span className="relative inline-block">
+          <span className="italic font-serif bg-gradient-to-r from-[#1e2757] via-[var(--accent)] to-[#1e2757] bg-clip-text text-transparent dark:from-orange-300 dark:via-orange-400 dark:to-orange-300">
+            Ship faster.
+          </span>
+          <svg
+            className="absolute -bottom-2 left-0 w-full h-3 text-[var(--accent)]"
+            viewBox="0 0 300 12"
+            fill="none"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 8 C60 2, 120 12, 180 6 S270 4, 298 8"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
+      </h1>
+
+      <p className="mt-8 max-w-2xl mx-auto text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed animate-fade-up delay-300">
+        Vellum is a calm Kanban workspace for teams. Share boards, hand out
+        tasks, review the work and watch every change land live, all in one
+        place.
+      </p>
+
+      <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up delay-400">
+        <Link
+          to="/signup"
+          className="bg-[#1e2757] hover:bg-[#151c45] text-white text-sm font-medium px-7 py-3.5 rounded-xl transition-colors shadow-lg shadow-[#1e2757]/25"
+        >
+          Get started free
+        </Link>
+        <a
+          href="#features"
+          className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200 text-sm font-medium px-7 py-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+        >
+          See how it works
+        </a>
+      </div>
+      <p className="mt-4 text-xs text-gray-400 animate-fade-up delay-500">
+        Free to use · Sign in with email or Google
+      </p>
+    </div>
+
+    {/* Marquee of sample tasks */}
+    <div className="relative mt-16 lg:mt-20 space-y-4 animate-fade-up delay-500">
+      <Marquee items={ROW_1} duration={55} />
+      <Marquee items={ROW_2} reverse duration={65} />
+    </div>
+  </section>
 );
 
 export default LandingHero;
