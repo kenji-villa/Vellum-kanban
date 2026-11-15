@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { assetUrl } from "../utils/assetUrl";
 
 const Header = () => {
   const { user } = useAuth();
@@ -13,10 +14,7 @@ const Header = () => {
     .slice(0, 2)
     .toUpperCase();
 
-  const API_BASE =
-    import.meta.env.VITE_API_URL?.replace("/api", "") ||
-    "http://localhost:4000";
-  const avatarUrl = user?.avatarUrl ? `${API_BASE}${user.avatarUrl}` : null;
+  const avatarUrl = assetUrl(user?.avatarUrl);
 
   return (
     <header className="h-16 bg-white/50 dark:bg-[#0f172a]/50 backdrop-blur-md flex items-center justify-between px-8 border-b border-gray-200/70 dark:border-slate-800 shrink-0">

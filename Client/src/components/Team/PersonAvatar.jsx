@@ -1,7 +1,6 @@
 import React from "react";
-
-const API_BASE =
-  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:4000";
+import { assetUrl } from "../../utils/assetUrl";
+export { assetUrl };
 
 const COLORS = [
   "bg-sky-500",
@@ -23,7 +22,6 @@ const hash = (id = "") => [...id].reduce((a, c) => a + c.charCodeAt(0), 0);
 
 export const colorFor = (id) => COLORS[hash(id) % COLORS.length];
 export const coverFor = (id) => COVERS[hash(id) % COVERS.length];
-export const assetUrl = (path) => (path ? `${API_BASE}${path}` : null);
 
 const PersonAvatar = ({ user, size = 40, ring = false }) => {
   const initials = (user?.name || "?")

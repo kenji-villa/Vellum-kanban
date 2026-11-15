@@ -5,6 +5,7 @@ import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../utils/api";
 import getCroppedImg from "../../utils/cropImage";
+import { assetUrl } from "../../utils/assetUrl";
 
 const AvatarUploader = ({ size = "large" }) => {
   const fileRef = useRef(null);
@@ -64,10 +65,7 @@ const AvatarUploader = ({ size = "large" }) => {
     .slice(0, 2)
     .toUpperCase();
 
-  const API_BASE =
-    import.meta.env.VITE_API_URL?.replace("/api", "") ||
-    "http://localhost:4000";
-  const avatarUrl = user?.avatarUrl ? `${API_BASE}${user.avatarUrl}` : null;
+  const avatarUrl = assetUrl(user?.avatarUrl);
 
   // Size variants — large (profile page) vs small (header)
   const dimensions = {

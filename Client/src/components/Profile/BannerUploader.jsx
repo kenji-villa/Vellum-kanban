@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../utils/api";
 import getCroppedImg from "../../utils/cropImage";
 import Modal from "../UI/Modal";
+import { assetUrl } from "../../utils/assetUrl";
 
 const BannerUploader = () => {
   const fileRef = useRef(null);
@@ -63,10 +64,7 @@ const BannerUploader = () => {
     }
   };
 
-  const API_BASE =
-    import.meta.env.VITE_API_URL?.replace("/api", "") ||
-    "http://localhost:4000";
-  const bannerUrl = user?.bannerUrl ? `${API_BASE}${user.bannerUrl}` : null;
+  const bannerUrl = assetUrl(user?.bannerUrl);
 
   return (
     <>
