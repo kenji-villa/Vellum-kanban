@@ -134,7 +134,7 @@ const AvatarUploader = ({ size = "large" }) => {
           onClose={() => setImageSrc(null)}
           title="Crop profile picture"
         >
-          <div className="relative w-full h-[320px] bg-gray-900 rounded-lg overflow-hidden mb-4">
+          <div className="relative w-full h-[260px] bg-gray-900 rounded-lg overflow-hidden mb-4">
             <Cropper
               image={imageSrc}
               crop={crop}
