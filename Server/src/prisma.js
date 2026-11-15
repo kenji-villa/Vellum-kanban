@@ -1,6 +1,6 @@
 import "dotenv/config";
 import pg from "pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 // Runtime uses the pooled connection string
