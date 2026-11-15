@@ -129,7 +129,7 @@ const BannerUploader = () => {
           onClose={() => setImageSrc(null)}
           title="Crop Banner"
         >
-          <div className="relative w-full h-[330px] bg-gray-900 rounded-lg overflow-hidden mb-4">
+          <div className="relative w-full h-[300px] bg-gray-900 rounded-lg overflow-hidden mb-4">
             <Cropper
               image={imageSrc}
               crop={crop}
