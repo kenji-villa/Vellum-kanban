@@ -26,7 +26,6 @@ Share boards, assign tasks, review the work, talk about it, and watch every chan
 
 - [About](#about)
 - [Features](#features)
-- [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
 - [Architecture](#architecture)
 - [Project structure](#project-structure)
@@ -114,21 +113,6 @@ Vellum is a full-stack project-management app built around Kanban boards. It sta
 
 ### Public pages
 - Landing page, **Terms of Service** and **Privacy Policy**
-
----
-
-## Screenshots
-
-> Add your own images to `docs/screenshots/` using the file names below.
-
-| | |
-|---|---|
-| ![Landing page](docs/screenshots/landing.png) | ![Dashboard](docs/screenshots/dashboard.png) |
-| **Landing page** | **Dashboard** |
-| ![Board](docs/screenshots/board.png) | ![Task dialog](docs/screenshots/task-dialog.png) |
-| **Board** | **Task: review workflow and activity** |
-| ![Team](docs/screenshots/team.png) | ![Analytics](docs/screenshots/analytics.png) |
-| **Team** | **Analytics** |
 
 ---
 
