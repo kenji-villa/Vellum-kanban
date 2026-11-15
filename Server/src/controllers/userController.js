@@ -1,13 +1,8 @@
 import prisma from "../prisma.js";
 import { sanitizeUser } from "../utils/sanitizeUser.js";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
 import { leaveUserFromBoard, emitToUser, disconnectUser } from "../realtime.js";
-
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOADS_DIR = path.join(__dirname, "../../uploads");
+import { leaveUserFromBoard, emitToUser, disconnectUser } from "../realtime.js";
+import { uploadImage, deleteUserImages } from "../utils/cloudinary.js";
 
 const str = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : undefined);
 
@@ -91,50 +86,32 @@ export const updateMe = async (req, res) => {
 // POST /api/users/me/banner
 export const uploadBanner = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file provided" });
-    }
-
-    const bannerUrl = `/uploads/${req.file.filename}`;
-    console.log("Attempting to save banner URL to DB:", bannerUrl); // Debug log
-
+    if (!req.file) return res.status(400).json({ message: "No file provided" });
+    const result = await uploadImage("banner", req.user.id, req.file.buffer);
     const user = await prisma.user.update({
       where: { id: req.user.id },
-      data: { bannerUrl: bannerUrl },
+      data: { bannerUrl: result.secure_url },
     });
-
-    res.json({
-      message: "Banner updated",
-      bannerUrl: user.bannerUrl,
-    });
+    res.json({ message: "Banner updated", bannerUrl: user.bannerUrl });
   } catch (err) {
-    console.error("uploadBanner FAILED:", err); 
-    res.status(500).json({ message: err.message || "Something went wrong" });
+    console.error("uploadBanner failed:", err);
+    res.status(500).json({ message: "Couldn't upload the image. Please try again." });
   }
 };
 
 // POST /api/users/me/avatar
 export const uploadAvatar = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file provided" });
-    }
-
-    const avatarUrl = `/uploads/${req.file.filename}`;
-    console.log("Attempting to save avatar URL to DB:", avatarUrl);
-
+    if (!req.file) return res.status(400).json({ message: "No file provided" });
+    const result = await uploadImage("avatar", req.user.id, req.file.buffer);
     const user = await prisma.user.update({
       where: { id: req.user.id },
-      data: { avatarUrl },
+      data: { avatarUrl: result.secure_url },
     });
-
-    res.json({
-      message: "Avatar updated",
-      avatarUrl: user.avatarUrl,
-    });
+    res.json({ message: "Avatar updated", avatarUrl: user.avatarUrl });
   } catch (err) {
-    console.error("uploadAvatar FAILED:", err);
-    res.status(500).json({ message: err.message || "Something went wrong" });
+    console.error("uploadAvatar failed:", err);
+    res.status(500).json({ message: "Couldn't upload the image. Please try again." });
   }
 };
 
@@ -167,8 +144,7 @@ export const deleteMe = async (req, res) => {
       prisma.user.delete({ where: { id: me } }),
     ]);
 
-    await removeUpload(user.bannerUrl);
-    await removeUpload(user.avatarUrl);
+    await deleteUserImages(me);
 
     // Tell other people's open tabs to refresh
     shared.forEach((m) => {

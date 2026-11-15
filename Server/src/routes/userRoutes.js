@@ -1,44 +1,39 @@
 import { Router } from "express";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { updateMe, uploadBanner,uploadAvatar,deleteMe  } from "../controllers/userController.js";
+import {
+  updateMe,
+  deleteMe,
+  uploadBanner,
+  uploadAvatar,
+} from "../controllers/userController.js";
 import { searchUsers, getPublicProfile } from "../controllers/teamController.js";
 
 const router = Router();
 
-// Ensure uploads directory exists
-const uploadDir = "uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-// Multer storage config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `banner-${req.user.id}-${Date.now()}${ext}`);
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB, same as the client check
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error("Please choose a JPG, PNG, WebP or GIF image"));
   },
 });
 
-// Filter to images only
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) cb(null, true);
-  else cb(new Error("Only images are allowed"), false);
-};
+// Turns upload problems into a clean message instead of a 500
+const single = (field) => (req, res, next) =>
+  upload.single(field)(req, res, (err) => {
+    if (!err) return next();
+    const message =
+      err.code === "LIMIT_FILE_SIZE" ? "Image must be under 8 MB" : err.message || "Upload failed";
+    res.status(400).json({ message });
+  });
 
-const upload = multer({ 
-  storage, 
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
-});
+router.get("/search", searchUsers);
+router.get("/:id/profile", getPublicProfile);
 
 router.patch("/me", updateMe);
 router.delete("/me", deleteMe);
-router.post("/me/banner", upload.single("banner"), uploadBanner);
-router.post("/me/avatar", upload.single("avatar"), uploadAvatar);
-router.get("/search", searchUsers);
-router.get("/:id/profile", getPublicProfile);
+router.post("/me/banner", single("banner"), uploadBanner);
+router.post("/me/avatar", single("avatar"), uploadAvatar);
 
 export default router;

@@ -1,13 +1,20 @@
+import "dotenv/config";
+import pg from "pg";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import dotenv from "dotenv";
 
-// Load environment variables (DATABASE_URL)
-dotenv.config();
-
-const adapter = new PrismaPg({
+// Runtime uses the pooled connection string
+const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 20000, 
+  connectionTimeoutMillis: 15000, 
 });
+
+// An error on an idle connection must never crash the server
+pool.on("error", (err) => console.error("Postgres pool error:", err.message));
+
+const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({
   adapter,
