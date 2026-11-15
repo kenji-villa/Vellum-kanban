@@ -1,7 +1,6 @@
 import prisma from "../prisma.js";
 import { sanitizeUser } from "../utils/sanitizeUser.js";
 import { leaveUserFromBoard, emitToUser, disconnectUser } from "../realtime.js";
-import { leaveUserFromBoard, emitToUser, disconnectUser } from "../realtime.js";
 import { uploadImage, deleteUserImages } from "../utils/cloudinary.js";
 
 const str = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : undefined);
