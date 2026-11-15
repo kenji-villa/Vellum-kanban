@@ -12,4 +12,6 @@ export const shapeCard = (c) => ({
   submittedAt: c.submittedAt,
   completedAt: c.completedAt,
   comments: c.comments,
+  createdAt: c.createdAt,
+  updatedAt: c.updatedAt,
 });
