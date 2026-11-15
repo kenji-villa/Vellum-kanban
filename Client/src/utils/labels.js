@@ -34,3 +34,16 @@ export const labelColor = (name, boardLabels = []) => {
   const key = custom?.color || builtIn?.color || LEGACY[lower] || "gray";
   return LABEL_COLORS[key] || LABEL_COLORS.gray;
 };
+
+export const LABEL_HEX = {
+  pink: "#ec4899", purple: "#a855f7", blue: "#3b82f6", red: "#ef4444", green: "#22c55e",
+  orange: "#f97316", yellow: "#eab308", teal: "#14b8a6", indigo: "#6366f1", gray: "#94a3b8",
+};
+
+// Colour key for a label name (board label, then built-in, then grey)
+export const labelKey = (name, boardLabels = []) => {
+  const lower = String(name).toLowerCase();
+  const custom = boardLabels.find((l) => l.name.toLowerCase() === lower);
+  const builtIn = DEFAULT_LABELS.find((l) => l.name.toLowerCase() === lower);
+  return custom?.color || builtIn?.color || LEGACY[lower] || "gray";
+};
