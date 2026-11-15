@@ -164,7 +164,7 @@ const Board = ({ board }) => {
 
   return (
     <div className="flex-1 flex flex-col px-8 py-6 overflow-hidden">
-      <h1 className="text-center text-2xl font-serif text-gray-800 tracking-widest uppercase mb-4">
+      <h1 className="text-center text-2xl font-serif text-blue-800 tracking-widest uppercase mb-6">
         {board.title}
       </h1>
 
