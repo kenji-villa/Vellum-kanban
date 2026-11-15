@@ -35,7 +35,7 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto flex-1">{children}</div>
+        <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
 
         {/* Footer */}
         {footer && (
