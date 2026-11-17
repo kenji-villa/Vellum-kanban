@@ -672,7 +672,7 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 **[YOUR NAME]**
 
 - GitHub: [@Dawit Moges](https://github.com/kenji-villa)
-- LinkedIn: [YOUR NAME](https://www.linkedin.com/in/dawit-moges-4ba260259)
+- LinkedIn: [Dawit Moges](https://www.linkedin.com/in/dawit-moges-4ba260259)
 - Email: [dawit94moges@gmail.com](mailto:dawit94moges@gmail.com.com)
 
 ---
